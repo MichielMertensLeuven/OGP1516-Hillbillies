@@ -1,5 +1,8 @@
 package hillbillies.model;
 
+//todo: testcase for Unit
+//Position naar vectorClass -> @Value
+
 import java.util.Scanner;
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.*;
@@ -20,8 +23,12 @@ import ogp.framework.util.*;
  * 			| inRange(getStrength(),getMinStrength(),getMaxStrength())
  * @invar	The toughness of each Unit must be a valid toughness for any Unit.
  * 			| inRange(getToughness(),getMinToughness(),getMaxToughness())
+ * @invar	The hitPoints of each Unit must be a valid hitPoints for any Unit.
+ * 			| inRange(getCurrentHitPoints(),minHitPoints, getMaxHitPoints())
+ * @invar	The staminaPoints of each Unit must be a valid staminaPoints for any Unit.
+ * 			| inRange(getCurrentStaminaPoints(),minStaminaPoints, getMaxStaminaPoints())
  * @invar	A unit can not do two activities at the same moment.
- * 			| ???
+ * 			| State is an enumeration
  * @invar  	The orientation of each Unit must be a valid orientation for any
  *         	Unit.
  *       	| isValidOrientation(getOrientation())
@@ -72,15 +79,9 @@ public class Unit{
 	 * 			| this.setWeight(correctInitialAttribute(weight))
 	 * @effect	The unit is set to default behavior.
 	 * 			| this.setDefaultBehaviorEnabled(enableDefaultBehavior)
-	 * 
-	 * @throws 	IllegalArgumentException
-	 * 			The given name or initialPosition is not valid.
-	 * 			| ((!isValidName(name)) ||
-	 * 			| (!isValidPosition(getCubeCentre(initialPosition))
 	 */
 	public Unit(String name, int[] initialPosition, int weight, int agility,
-			int strength, int toughness, boolean enableDefaultBehavior)
-			throws IllegalArgumentException {
+			int strength, int toughness, boolean enableDefaultBehavior){
 		this.setName(name);
 		this.setPosition(Position.getCubeCentre(initialPosition));
 		this.setAgility(correctInitialAttribute(agility));
@@ -116,6 +117,7 @@ public class Unit{
 	/**
 	 * Returns the position of this Unit.
 	 */
+	@Raw @Basic
     public Position getPosition() {
     	return this.position;
     }
@@ -147,6 +149,7 @@ public class Unit{
      * @post	The orientation of the Unit before switching its orientation is registered.
      * 			| (new.lastOrientationBeforeInterruption = this.getOrientation())
      */
+    @Raw //todo zeker?
     private void setState(State state) {
 		this.lastStateBeforeInterruption = this.getState();
 		this.lastOrientationBeforeInterruption = this.getOrientation();
@@ -168,6 +171,7 @@ public class Unit{
     /**
      * Returns the state this unit is in.    
      */
+    @Raw @Basic
     private State getState() {
     	return this.state;
     }
@@ -186,6 +190,7 @@ public class Unit{
 	 * @return	Whether value is in the range between minValue and maxValue
 	 * 			| result == (minValue <= value) && (value <= maxValue))
 	 */
+    @Model
 	private static boolean inRange(int value, int minValue, int maxValue) {
 		assert(minValue <= maxValue);
 		return ((minValue <= value) && (value <= maxValue));
@@ -206,6 +211,7 @@ public class Unit{
 	 * 			| else if (value < minValue) then result == minValue
 	 * 			| else result == value
 	 */
+    @Model
 	private static int clip(int value, int minValue, int maxValue){
 		if (value > maxValue)
 			value = maxValue;
@@ -250,7 +256,7 @@ public class Unit{
 	 *       	| result == (name != null) && 
 	 *       	| 	(new Scanner(name).findInLine(validSyntaxOfName) != null)
 	*/
-	public static boolean isValidName(String name) {
+	private static boolean isValidName(String name) {
 		return (name != null) && (new Scanner(name).findInLine(validSyntaxOfName) != null);
 	}
 	
@@ -336,7 +342,7 @@ public class Unit{
 	 * @return 	the lowest possible weight for this Unit.
 	 * 			| result == (int) Math.ceil((this.getAgility() + this.getStrength())/2.0)
 	 */
-	@Basic
+	@Basic @Raw //@Raw because it is called by setWeight
 	private int getMinWeight(){
 		return (int) Math.ceil((this.getAgility() + this.getStrength())/2.0);
 	}
@@ -467,7 +473,7 @@ public class Unit{
 	 * @return	The maximum stamina points
 	 * 			| result == (int) Math.ceil(200*this.getWeight()*this.getToughness()/10000.0)
 	 */
-	@Basic
+	@Basic @Raw
 	public int getMaxStaminaPoints(){
 		return (int) Math.ceil(200*this.getWeight()*this.getToughness()/10000.0);
 	}
@@ -514,7 +520,8 @@ public class Unit{
 	 * 			| result == inRange(staminaPoints, 
 	 * 			|		minStaminaPoints, this.getMaxStaminaPoints())
 	 */
-	public boolean isValidStaminaPoints(int staminaPoints){
+	@Raw
+	private boolean isValidStaminaPoints(int staminaPoints){
 		return inRange(staminaPoints, minStaminaPoints, this.getMaxStaminaPoints());
 	}
 	
@@ -522,8 +529,11 @@ public class Unit{
 	 * Variable registering the stamina points of this Unit.
 	 */
 	private int staminaPoints;
+	
+	/**
+	 * Variable registering the minimum staminapoints for all Units
+	 */
 	private final static int minStaminaPoints = 0;
-
 
 	/**
 	 * Return the maximum hit points this Unit can have.
@@ -577,7 +587,8 @@ public class Unit{
 	 * 			| result == (hitPoints >= minHitPoints) &&
 	 * 			| (hitPoints <= this.getMaxHitPoints())
 	 */
-	public boolean isValidHitPoints(int hitPoints){
+	@Raw //todo? vragen aan jasper ook bij staminapoints
+	private boolean isValidHitPoints(int hitPoints){
 		return inRange(hitPoints, minHitPoints, this.getMaxHitPoints());
 	}
 	
@@ -585,6 +596,10 @@ public class Unit{
 	 * Variable registering the hit points of this Unit.
 	 */
 	private int hitPoints;
+	
+	/**
+	 * Variable registering the minimum number of hitPoints for all Units.
+	 */
 	private final static int minHitPoints = 0;
 
 	/**
@@ -595,7 +610,7 @@ public class Unit{
 	 * @return	The validity of dt.
 	 * 			| result == ((dt>0) && (dt <0.2))
 	 */
-	public static boolean isValidDuration(double dt){
+	private static boolean isValidDuration(double dt){
 		return (dt>0) && (dt <0.2);
 	}
 
@@ -693,8 +708,8 @@ public class Unit{
 	 *         The orientation to check.
 	 * @return 
 	 *       | result == (orientation =< Math.PI) && (orientation > -Math.PI)
-	*/
-	public static boolean isValidOrientation(double orientation) {
+	 */
+	private static boolean isValidOrientation(double orientation) {
 		return (Util.fuzzyLessThanOrEqualTo(orientation, Math.PI)) && 
 				(orientation > -Math.PI);
 	}
@@ -715,7 +730,7 @@ public class Unit{
 	 *       	|   then new.getOrientation() == (orientation+Math.PI)%Math.PI*2-Math.PI
 	 */
 	@Raw
-	public void setOrientation(double orientation) {
+	private void setOrientation(double orientation) {
 		if (!isValidOrientation(orientation))
 			orientation = (orientation+Math.PI)%Math.PI*2-Math.PI;
 		this.orientation = orientation;
@@ -772,7 +787,7 @@ public class Unit{
 	 * 			| if (this.isSprinting()) then factor *= 2
 	 * 			| result == factor*this.getBasSpeed()	
 	 */
-	public double getCurrentSpeed(int stepDirectionInZ){
+	private double getCurrentSpeed(int stepDirectionInZ){
 		double factor = 1.0;
 		if (stepDirectionInZ == -1)
 			factor = 1.2;
@@ -1235,9 +1250,9 @@ public class Unit{
 		if (this.timeToFight > duration)
 			this.timeToFight -= duration;
 		else{
-			this.setState(this.lastStateBeforeInterruption);
-			this.timeToFight = 0.0;
 			this.setOrientation(this.lastOrientationBeforeInterruption);
+			this.setState(this.lastStateBeforeInterruption);
+			this.timeToFight = 0.0;			
 		}	
 	}
 	
@@ -1257,7 +1272,7 @@ public class Unit{
 	 * @post	The Unit of the attacker is registered.
 	 * 			| (new.isDefendingTo == attacker)
 	 */
-	public void defend(Unit attacker){
+	private void defend(Unit attacker){
 		this.setState(State.DEFENDING);
 		this.timeToFight = fightDuration;
 		this.isDefendingTo = attacker;
@@ -1309,10 +1324,10 @@ public class Unit{
 					newHitPoints = 0;
 				this.setHitPoints(newHitPoints);
 				}
+			this.setOrientation(this.lastOrientationBeforeInterruption);
 			this.setState(this.lastStateBeforeInterruption);
 			this.timeToFight = 0.0;
 			this.isDefendingTo = null;
-			this.setOrientation(this.lastOrientationBeforeInterruption);
 		}
 	}
 	
@@ -1382,7 +1397,7 @@ public class Unit{
 	 * has not been resting long enough to gain 1 hitPoint or
 	 * has already got its maximum hitPoints, this is called recovering.
 	 */
-	public boolean isRecovering(){
+	private boolean isRecovering(){
 		return this.isRecovering;
 	}
 	
@@ -1431,7 +1446,7 @@ public class Unit{
 	 * @post	The Unit rests in default orientation
 	 * 			| (new.getOrientation == Position.defaultOrientation)
 	 */
-	public void forceRest() throws IllegalStateException{
+	private void forceRest() throws IllegalStateException{
 		this.setState(State.RESTING);
 		this.isRecovering = true;
 		this.elapsedRestingTime = 0;
@@ -1480,8 +1495,8 @@ public class Unit{
 			if (this.getCurrentHitPoints() == this.getMaxHitPoints()){
 				this.isRecovering = false;
 				if (this.getCurrentStaminaPoints() == this.getMaxStaminaPoints()){
-					this.setState(this.lastStateBeforeInterruption);
 					this.setOrientation(this.lastOrientationBeforeInterruption);
+					this.setState(this.lastStateBeforeInterruption);
 				}
 				else {
 					int deltaSta = (int)((this.getToughness()/100.0)*nbOfTicks);
@@ -1547,7 +1562,7 @@ public class Unit{
 	 * 			The unit can't be in default behavior already
 	 * 			| (this.defaultBehaviorEnabled)
 	 */
-	public void startDefaultBehavior() throws IllegalStateException{
+	private void startDefaultBehavior() throws IllegalStateException{
 		if (this.defaultBehaviorEnabled)
 			throw new IllegalStateException();
 		this.defaultBehaviorEnabled = true;
@@ -1562,7 +1577,7 @@ public class Unit{
 	 * 			The unit must be in default behavior already
 	 * 			| (!this.defaultBehaviorEnabled)
 	 */
-	public void stopDefaultBehavior() throws IllegalStateException{
+	private void stopDefaultBehavior() throws IllegalStateException{
 		if (!this.defaultBehaviorEnabled)
 			throw new IllegalStateException();
 		this.defaultBehaviorEnabled = false;
