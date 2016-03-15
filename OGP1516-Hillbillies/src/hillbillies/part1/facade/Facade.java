@@ -48,7 +48,7 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public double[] getPosition(Unit unit) throws ModelException{
-		return unit.getPosition().getCoordinates();
+		return unit.getPosition().getVector();
 	}
 
 	/**
@@ -91,7 +91,8 @@ public class Facade implements IFacade {
 	 */
 	public void setName(Unit unit, String newName) throws ModelException{
 		try{unit.setName(newName);
-		} catch (IllegalArgumentException e) {throw new ModelException("A name should ...");}
+		} catch (NullPointerException n) {throw new ModelException("Please enter a name");} 
+		catch (IllegalArgumentException e) {throw new ModelException("Name is invalid");}
 	}
 
 	/* Attributes */

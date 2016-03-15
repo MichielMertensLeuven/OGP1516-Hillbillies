@@ -1,13 +1,11 @@
 package hillbillies.part1.internal.controller;
 
 import hillbillies.common.internal.controller.DefaultInputMode;
-import hillbillies.common.internal.controller.GameController;
-import hillbillies.part1.facade.IFacade;
 import javafx.scene.input.KeyEvent;
 
 public class Part1InputMode extends DefaultInputMode {
 
-	public Part1InputMode(GameController<? extends IFacade> controller) {
+	public Part1InputMode(IGameController1<?> controller) {
 		super(controller);
 	}
 

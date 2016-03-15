@@ -83,14 +83,15 @@ public class Unit{
 	public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior){
 		this.setName(name);
-		this.setPosition(Position.getCubeCentre(initialPosition));
+		this.setPosition(Vector.getCubeCenter(initialPosition));
 		this.setAgility(correctInitialAttribute(agility));
 		this.setStrength(correctInitialAttribute(strength));
 		this.setToughness(correctInitialAttribute(toughness));
 		this.setWeight(correctInitialAttribute(weight));
-		this.setOrientation(Position.defaultOrientation);
-		this.setHitPoints(this.getMaxHitPoints());
-		this.setStaminaPoints(this.getMaxStaminaPoints());
+		this.setOrientation(Unit.defaultOrientation);
+		this.setHitPoints((int) (0.8*this.getMaxHitPoints()));
+		this.setStaminaPoints((int) (0.8*this.getMaxStaminaPoints()));
+		 // Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
 		this.defaultBehaviorEnabled = enableDefaultBehavior;
 		this.setState(State.IDLE);
 	}
@@ -98,7 +99,7 @@ public class Unit{
 	/**
 	 * Variable registering the position of the Unit.
 	 */
-    private Position position;
+    private Vector position;
     
 	/**
 	 * Set the position of this Unit to the given position.
@@ -109,19 +110,75 @@ public class Unit{
 	 *         the given position.
 	 *         | new.getPosition() == position
 	 */
+    // todo hier correcte coordinaten checken!!
 	@Raw
-    private void setPosition(Position position) {
-    	this.position = position;
+    private void setPosition(Vector position) throws IllegalArgumentException{
+    	if (! isValidPosition(position))
+    		throw new IllegalArgumentException();
+		this.position = position;
     }
     
 	/**
 	 * Returns the position of this Unit.
 	 */
 	@Raw @Basic
-    public Position getPosition() {
+    public Vector getPosition() {
     	return this.position;
     }
-    
+	
+	/**
+	 * Check whether the given Vector is a valid Vector for
+	 * any Unit.
+	 *  
+	 * @param  	coordinates
+	 *         	The coordinates to check.
+	 * @return 	The validity of the coordinates
+	 *       	| if (coordinates == null || coordinates.length != 3)
+	 *       	|	 then result == false
+	 *       	| if (for (int i=0; i<3; i++) (0<=coordinates[i]<maxCube[i]+1))
+	 *       	|	 then result == true
+	*/
+	public static boolean isValidPosition(Vector position) {
+		if (position == null || position.getLenght() != 3)
+			return false;
+		return (position.isGreaterThanOrEqualTo(minPosition) &&
+				position.isLessThanOrEqualTo(maxPosition));
+	}
+	
+	public static boolean isValidCube(int[] cube){
+		return isValidPosition(Vector.getCubeCenter(cube));
+	}
+	
+	private static final Vector maxPosition = new Vector(new double[] {50,50,50});
+	private static final Vector minPosition = new Vector(new double[3]);
+	
+	/**
+	 * Calculates the orientation between this Vector and
+	 * a target Vector to look to.
+	 * 
+	 * @param 	target
+	 * 			The Vector to look to.
+	 * @return	The orientation
+	 * 			| if (dx == 0) && (dy == 0) then result == defaultOrientation
+	 * 			| else result == Math.atan2(dy,dx)
+	 */
+	public double orientationTo(Vector target){
+		double dx = this.getPosition().distanceInX(target);
+		double dy = this.getPosition().distanceInY(target);
+		if ((dx != 0) || (dy != 0)) {
+			return Math.atan2(dy, dx);
+		}
+		else {
+			// preferred orientation when moving along the z-axis
+			return Unit.defaultOrientation;
+		}
+	}
+
+	/**
+	 * Variable containing the default orientation.
+	 */
+	public static final double defaultOrientation = Math.PI/2; 
+	
     /**
      * Variable registering the state the Unit currently in.
      */
@@ -135,7 +192,7 @@ public class Unit{
     /**
      * Variable registering the orientation the Unit had before it changed State.
      */
-    private double lastOrientationBeforeInterruption = Position.defaultOrientation; 
+    private double lastOrientationBeforeInterruption = Unit.defaultOrientation; 
 
     /**
      * Change the State of this Unit to state.
@@ -191,7 +248,7 @@ public class Unit{
 	 * 			| result == (minValue <= value) && (value <= maxValue))
 	 */
     @Model
-	private static boolean inRange(int value, int minValue, int maxValue) {
+	public static boolean inRange(int value, int minValue, int maxValue) {
 		assert(minValue <= maxValue);
 		return ((minValue <= value) && (value <= maxValue));
 	}
@@ -281,9 +338,11 @@ public class Unit{
 	 */
 	@Raw
 	public void setName(String name) 
-			throws IllegalArgumentException {
+			throws NullPointerException, IllegalArgumentException {
+		if (name == null)
+			throw new NullPointerException();
 		if (! isValidName(name))
-			throw new IllegalArgumentException("invalid name");
+			throw new IllegalArgumentException();
 		else
 			this.name = name;
 	}
@@ -763,11 +822,7 @@ public class Unit{
 	 * 			| result == |this.velocity| //|v| is the magnitude of the speed vector.
 	 */
 	public double getCurrentSpeed(){
-		double speed = 0;
-		for (int i=0; i<this.velocity.length; i++)
-			speed += velocity[i]*velocity[i];
-		speed = Math.sqrt(speed);
-		return speed;
+		return this.velocity.getMagnitude();
 	}
 	
 	/**
@@ -815,16 +870,14 @@ public class Unit{
 	 * @post	The state is set to moving.
 	 * 			| new.isState(State.MOVING)
 	 */
-	private void setShortTermTarget(Position target){
-		double d  = this.getPosition().distanceTo(target);
+	private void setShortTermTarget(Vector target){
+		double d  = this.getPosition().distanceBetween(target);
 		if (!Util.fuzzyEquals(d,  0.0)){ // avoid division by 0
 			double v =  getCurrentSpeed(this.getPosition().stepDirectionInZ(target));
-			double dx = this.getPosition().distanceInX(target);
-			double dy = this.getPosition().distanceInY(target);
-			double dz = this.getPosition().distanceInZ(target);
-			this.velocity = new double[] {v*dx/d, v*dy/d, v*dz/d};
-			this.timeToArrive = d*Position.cubeLength/v;
-			this.setOrientation(this.getPosition().orientationTo(target));
+			Vector distance = this.getPosition().distanceVector(target);
+			this.velocity = distance.multiply(v/d);
+			this.timeToArrive = d*Vector.cubeLength/v;
+			this.setOrientation(this.orientationTo(target));
 			this.setState(State.MOVING);
 		}
 	}
@@ -832,7 +885,7 @@ public class Unit{
 	/**
 	 * Variable registering the velocity of a Unit.
 	 */
-	private double[] velocity = new double[3];
+	private Vector velocity = new Vector(3);
 	
 	/**
 	 * Variable registering the time to arrive to the sort term target.
@@ -842,7 +895,7 @@ public class Unit{
 	/**
 	 * Variable registering the overall target Position.
 	 */
-	private Position targetPosition;
+	private Vector targetPosition;
 	
 	/**
 	 * A method for updating a Unit when moving and ending the moving procedure.  
@@ -898,11 +951,8 @@ public class Unit{
 	private void finishMoving(double duration){
 		if (this.timeToArrive > duration){
 			this.timeToArrive -= duration;
-			Position newPosition = this.getPosition().shift(
-					this.velocity[0]*duration,
-					this.velocity[1]*duration,
-					this.velocity[2]*duration);
-			this.setPosition(newPosition);
+			Vector newVector = this.getPosition().addVector(this.velocity.multiply(duration));
+		this.setPosition(newVector);
 		}
 		else{
 			if (this.getPosition().isTheSameCube(this.targetPosition)){
@@ -911,14 +961,15 @@ public class Unit{
 					this.stopSprinting();
 				this.setState(State.IDLE);
 				this.timeToArrive = 0;
-				this.setOrientation(Position.defaultOrientation);
-				this.velocity = new double[3];
+				this.setOrientation(Unit.defaultOrientation);
+				this.velocity = new Vector(3);
 			}
 			else {
 				this.moveTo(this.targetPosition.getCubeCoordinates());
 			}
 		}
-		if (this.defaultBehaviorEnabled && !this.isSprinting() && !this.hasTriedSprintingDuringThisMove) {
+		if (this.defaultBehaviorEnabled && !this.isSprinting() && 
+				!this.hasTriedSprintingDuringThisMove) {
 			if (Math.random() > 0.25)
 			{
 				this.startSprinting();
@@ -974,15 +1025,13 @@ public class Unit{
 	 * 			multiple successive steps.
 	 */
 	public void moveTo(int[] cube) throws IllegalArgumentException{
-		if (!Position.isValidCube(cube))
+		if (!Unit.isValidCube(cube))
 			throw new IllegalArgumentException();
-		this.targetPosition = Position.getCubeCentre(cube);
+		this.targetPosition = Vector.getCubeCenter(cube);
 		this.hasTriedSprintingDuringThisMove = false;
-		int dx = this.getPosition().stepDirectionInX(targetPosition);
-		int dy = this.getPosition().stepDirectionInY(targetPosition);
-		int dz = this.getPosition().stepDirectionInZ(targetPosition);
-		Position shortTermTarget = getPosition().shift(dx,dy,dz); 
-		Position shortTermTargetCenter = Position.getCubeCentre(shortTermTarget.getCubeCoordinates()); // Always walk through the centers of the grid
+		Vector step = this.getPosition().stepDirection(targetPosition);
+		Vector shortTermTarget = this.getPosition().addVector(step); 
+		Vector shortTermTargetCenter = Vector.getCubeCenter(shortTermTarget.getCubeCoordinates()); // Always walk through the centers of the grid
 		this.setShortTermTarget(shortTermTargetCenter);
 	}
 	
@@ -1004,10 +1053,10 @@ public class Unit{
 	 * 			|	 (!Position.isValidAdjoint(dz)))
 	 */
 	public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException{
-		if ((!Position.isValidAdjoint(dx)) || (!Position.isValidAdjoint(dy)) ||
-				(!Position.isValidAdjoint(dz)))
+		if ((!Vector.isValidAdjoint(dx)) || (!Vector.isValidAdjoint(dy)) ||
+				(!Vector.isValidAdjoint(dz)))
 			throw new IllegalArgumentException();
-		Position adjacentPosition = this.getPosition().shift(dx,dy,dz);
+		Vector adjacentPosition = this.getPosition().shift(dx,dy,dz);
 		this.moveTo(adjacentPosition.getCubeCoordinates());
 	}
 	
@@ -1044,8 +1093,7 @@ public class Unit{
 			throw new IllegalStateException();
 		this.isSprinting = true;
 		this.timeToArrive /= 2.0;
-		for (int i=0; i<3; i++)
-			this.velocity[i] *= 2.0;
+		this.velocity = this.velocity.multiply(2.0);
 		this.timeSprinting = 0;
 	}
 	/**
@@ -1072,8 +1120,7 @@ public class Unit{
 			throw new IllegalStateException();
 		this.isSprinting = false;
 		this.timeToArrive *= 2.0;
-		for (int i=0; i<3; i++)
-			this.velocity[i] /= 2.0;
+		this.velocity = this.velocity.multiply(0.5);
 	}
 	
 	// -------------
@@ -1111,7 +1158,7 @@ public class Unit{
 	public void work() throws IllegalStateException{
 		if (this.isWorking() || this.isMoving() ||
 				this.isDefending() || this.isAttacking() || this.isRecovering())
-					throw new IllegalStateException("is already busy");
+					throw new IllegalStateException();
 		this.setState(State.WORKING);
 		this.timeToWork = (500.0/this.getStrength());
 	}
@@ -1224,7 +1271,7 @@ public class Unit{
 	private void attack(Unit defender){
 		this.setState(State.ATTACKING);
 		this.timeToFight = fightDuration;
-		this.setOrientation(this.getPosition().orientationTo(defender.getPosition()));
+		this.setOrientation(this.orientationTo(defender.getPosition()));
 	}
 	
 	/**
@@ -1276,7 +1323,7 @@ public class Unit{
 		this.setState(State.DEFENDING);
 		this.timeToFight = fightDuration;
 		this.isDefendingTo = attacker;
-		this.setOrientation(this.getPosition().orientationTo(attacker.getPosition()));
+		this.setOrientation(this.orientationTo(attacker.getPosition()));
 	}
 	
 	/**
@@ -1317,7 +1364,7 @@ public class Unit{
 		if (this.timeToFight > duration)
 			this.timeToFight -= duration;
 		else{
-			if ((! this.dodge()) && (! this.block())){
+			if ((! this.tryToDodge()) && (! this.block())){
 				int newHitPoints = (int) (this.getCurrentHitPoints()-
 						this.isDefendingTo.getStrength()/10.0+0.5);
 				if (newHitPoints < 0)
@@ -1345,16 +1392,36 @@ public class Unit{
 	 * 			| else
 	 * 			| 	(result == false)
 	 */
-	private boolean dodge(){
+	private boolean tryToDodge(){
 		double dodgeProbability = 0.2*this.getAgility()/this.isDefendingTo.getAgility();
 		double result = Math.random();
 		if (Util.fuzzyGreaterThanOrEqualTo(result, dodgeProbability))
 			return false;
 		else{
-			Position newPosition = this.getPosition().dodge();
-			this.setPosition(newPosition);
+			this.setPosition(this.dodgePosition());
 			return true;
 		}
+	}
+	
+	/**
+	 * Returns a random good Vector when dodging.
+	 * This is a new Vector that differs +/- 0..1 along the
+	 * x- and z-axis.
+	 * 
+	 * @return The valid newVector.
+	 */
+	public Vector dodgePosition(){
+		boolean goodPosition = false;
+		Vector newPosition = new Vector(3);
+		while (! goodPosition){
+			double[] jumpStep = new double[] {Math.random()*2-1.0, Math.random()*2-1.0, 0};
+			// x +- 0..1; y +- 0..1; same z plane
+			newPosition = this.getPosition().addVector(new Vector(jumpStep));
+			goodPosition = (isValidPosition(newPosition) && 
+					(!this.getPosition().equals(newPosition)));
+	
+		}
+		return newPosition;
 	}
 	
 	/**
@@ -1450,7 +1517,7 @@ public class Unit{
 		this.setState(State.RESTING);
 		this.isRecovering = true;
 		this.elapsedRestingTime = 0;
-		this.setOrientation(Position.defaultOrientation);
+		this.setOrientation(Unit.defaultOrientation);
 	}
 	
 	/**
@@ -1596,5 +1663,6 @@ public class Unit{
 		else this.moveTo(new int[] {(int) (50.0*Math.random()),
 				 (int) (50.0*Math.random()), (int) (50.0*Math.random())}); 
 	}
+	
 }
 
