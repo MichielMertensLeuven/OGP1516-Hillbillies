@@ -1,4 +1,4 @@
-package hillbillies.model;
+package hillbillies.model.unit;
 
 /**
  * An enumeration of all the states a Unit can be into.

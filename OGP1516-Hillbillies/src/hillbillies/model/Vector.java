@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.unit.Unit;
 import ogp.framework.util.Util;
 
 /**
@@ -48,6 +49,10 @@ public class Vector {
 	
 	public double[] getVector(){
 		return this.vector.clone();
+	}
+	
+	public Vector clone(){
+		return new Vector(this.getVector());
 	}
 	
 	public Vector addVector(Vector vectorToAdd) throws IllegalArgumentException{
@@ -346,13 +351,12 @@ public class Vector {
 	}
 	
 	public boolean isLessThanOrEqualTo(Vector compare) throws IllegalArgumentException{
-		if (!this.isCompatible(compare))
-			throw new IllegalArgumentException();
-		for (int i=0;i<this.getLenght();i++){
-			if (!Util.fuzzyLessThanOrEqualTo(this.getVector()[i],compare.getVector()[i]))
-				return false;
-		}
-		return true;
+		return !this.isGreaterThanOrEqualTo(compare);
+	}
+	
+	public boolean inRange(Vector minVector, Vector maxVector)
+			throws IllegalArgumentException{
+		return (this.isGreaterThanOrEqualTo(minVector) && this.isLessThanOrEqualTo(maxVector));
 	}
 	
 	public boolean equals(Vector compare) throws IllegalArgumentException{
@@ -364,7 +368,6 @@ public class Vector {
 		}
 		return true;
 	}
-	
-	
+
 	
 }

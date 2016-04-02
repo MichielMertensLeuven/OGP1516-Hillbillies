@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import hillbillies.model.*;
+import hillbillies.model.unit.Unit;
 import ogp.framework.util.Util;
 
 public class Part1TestUnit {

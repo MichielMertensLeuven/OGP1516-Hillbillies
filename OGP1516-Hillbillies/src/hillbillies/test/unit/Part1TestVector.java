@@ -1,12 +1,12 @@
 package hillbillies.test.unit;
 
-import static hillbillies.tests.util.PositionAsserts.*;
+//import static hillbillies.tests.util.PositionAsserts.*;
 
 import static org.junit.Assert.*;
 
 //import org.junit.After;
 //import org.junit.AfterClass;
-import org.junit.Assert;
+//import org.junit.Assert;
 //import org.junit.Before;
 //import org.junit.BeforeClass;
 import org.junit.Test;

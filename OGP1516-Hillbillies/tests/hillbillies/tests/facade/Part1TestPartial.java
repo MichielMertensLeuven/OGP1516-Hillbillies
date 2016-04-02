@@ -5,10 +5,12 @@ import static hillbillies.tests.util.PositionAsserts.assertIntegerPositionEquals
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import hillbillies.model.Unit;
+import hillbillies.model.unit.Unit;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
 import ogp.framework.util.ModelException;
@@ -21,11 +23,14 @@ public class Part1TestPartial {
 	public void setup() {
 		this.facade = new Facade();
 	}
-
+	
+	
+	
 	@Test
 	public void testCubeCoordinate() throws ModelException {
 		Unit unit = facade.createUnit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
 		assertIntegerPositionEquals("A valid position should be accepted", 1, 2, 3, facade.getCubeCoordinate(unit));
+		System.out.println(Arrays.deepToString(new int[4][3][5]));
 	}
 
 	@Test

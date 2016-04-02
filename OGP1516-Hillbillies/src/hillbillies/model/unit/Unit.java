@@ -1,10 +1,23 @@
-package hillbillies.model;
+package hillbillies.model.unit;
+// TODO: zééér belangrijk: gameobject uitwerken!
 
-//todo: testcase for Unit
-//Position naar vectorClass -> @Value
+// TODO: isAlive & work at uitwerken!!!!!!!!!!!!!!!!
+// TODO: moet er rekeining gehouden worden met units die niet in de wereld geïnitialiseerd
+//		 worden, bv met een faction?
+// TODO: throws subfunctie ook vanboven erbij!!
+// TODO: testcase for Unit
+// TODO: Position naar vectorClass -> @Value
+// TODO: maar snelle constructor voor unit zie hoorcollege6 dog
+// eens leuk self adaptive systems, tekenprogramma
+// Integer: referentie boxing, int: value unboxing
+// TODO: checken op overflows!!
+// TODO: protected nakijken
+// TODO: checken of final gebruiken.
+// TODO: what if dt changes in multiple aanroepingen
 
 import java.util.Scanner;
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.*;
 import ogp.framework.util.*;
 
 /**
@@ -36,7 +49,7 @@ import ogp.framework.util.*;
  * @version  1.0
  * @author Michiel Mertens
  */
-public class Unit{
+public class Unit extends GameObject{
 	/** 
 	 * Initialize a new Unit with given name, properties and
 	 * enable default behavior.
@@ -81,7 +94,8 @@ public class Unit{
 	 * 			| this.setDefaultBehaviorEnabled(enableDefaultBehavior)
 	 */
 	public Unit(String name, int[] initialPosition, int weight, int agility,
-			int strength, int toughness, boolean enableDefaultBehavior){
+			int strength, int toughness, boolean enableDefaultBehavior, Faction faction){
+		super(Vector.getCubeCenter(initialPosition));
 		this.setName(name);
 		this.setPosition(Vector.getCubeCenter(initialPosition));
 		this.setAgility(correctInitialAttribute(agility));
@@ -94,6 +108,27 @@ public class Unit{
 		 // Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
 		this.defaultBehaviorEnabled = enableDefaultBehavior;
 		this.setState(State.IDLE);
+		if (!faction.addUnit(this))
+			throw new IllegalArgumentException();
+		this.faction = faction;
+	}
+	
+	public Unit(String name, int[] initialPosition, int weight, int agility,
+			int strength, int toughness, boolean enableDefaultBehavior){
+		super(Vector.getCubeCenter(initialPosition));
+		this.setName(name);
+		this.setPosition(Vector.getCubeCenter(initialPosition));
+		this.setAgility(correctInitialAttribute(agility));
+		this.setStrength(correctInitialAttribute(strength));
+		this.setToughness(correctInitialAttribute(toughness));
+		this.setWeight(correctInitialAttribute(weight));
+		this.setOrientation(Unit.defaultOrientation);
+		this.setHitPoints((int) (0.8*this.getMaxHitPoints()));
+		this.setStaminaPoints((int) (0.8*this.getMaxStaminaPoints()));
+		 // Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
+		this.defaultBehaviorEnabled = enableDefaultBehavior;
+		this.setState(State.IDLE);
+		this.faction = new Faction();
 	}
 	
 	/**
@@ -110,7 +145,7 @@ public class Unit{
 	 *         the given position.
 	 *         | new.getPosition() == position
 	 */
-    // todo hier correcte coordinaten checken!!
+    // TODO hier correcte coordinaten checken!!
 	@Raw
     private void setPosition(Vector position) throws IllegalArgumentException{
     	if (! isValidPosition(position))
@@ -206,7 +241,7 @@ public class Unit{
      * @post	The orientation of the Unit before switching its orientation is registered.
      * 			| (new.lastOrientationBeforeInterruption = this.getOrientation())
      */
-    @Raw //todo zeker?
+    @Raw //TODO zeker?
     private void setState(State state) {
 		this.lastStateBeforeInterruption = this.getState();
 		this.lastOrientationBeforeInterruption = this.getOrientation();
@@ -646,7 +681,7 @@ public class Unit{
 	 * 			| result == (hitPoints >= minHitPoints) &&
 	 * 			| (hitPoints <= this.getMaxHitPoints())
 	 */
-	@Raw //todo? vragen aan jasper ook bij staminapoints
+	@Raw //TODO? vragen aan jasper ook bij staminapoints
 	private boolean isValidHitPoints(int hitPoints){
 		return inRange(hitPoints, minHitPoints, this.getMaxHitPoints());
 	}
@@ -1364,7 +1399,7 @@ public class Unit{
 		if (this.timeToFight > duration)
 			this.timeToFight -= duration;
 		else{
-			if ((! this.tryToDodge()) && (! this.block())){
+			if ((! this.tryTODOdge()) && (! this.block())){
 				int newHitPoints = (int) (this.getCurrentHitPoints()-
 						this.isDefendingTo.getStrength()/10.0+0.5);
 				if (newHitPoints < 0)
@@ -1392,7 +1427,7 @@ public class Unit{
 	 * 			| else
 	 * 			| 	(result == false)
 	 */
-	private boolean tryToDodge(){
+	private boolean tryTODOdge(){
 		double dodgeProbability = 0.2*this.getAgility()/this.isDefendingTo.getAgility();
 		double result = Math.random();
 		if (Util.fuzzyGreaterThanOrEqualTo(result, dodgeProbability))
@@ -1664,5 +1699,95 @@ public class Unit{
 				 (int) (50.0*Math.random()), (int) (50.0*Math.random())}); 
 	}
 	
-}
+	/** TO BE ADDED TO CLASS HEADING
+	 * @invar  The experiencePoints of each Unit must be a valid experiencePoints for any
+	 *         Unit.
+	 *       | isValidExperiencePoints(getExperiencePoints())
+	 */
 
+	
+	/**
+	 * Return the experiencePoints of this Unit.
+	 */
+	@Basic
+	public int getExperiencePoints() {
+		return this.ExpPoints;
+	}
+	
+	/**
+	 * Check whether the given experiencePoints is a valid experiencePoints for
+	 * any Unit.
+	 *  
+	 * @param  experiencePoints
+	 *         The experiencePoints to check.
+	 * @return 
+	 *       | result == 
+	*/
+	public static boolean isValidExtraExperiencePoints(int ExpPoints) {
+		return (ExpPoints>=0);
+	}
+	
+	/**
+	 * Set the experiencePoints of this Unit to the given experiencePoints.
+	 * 
+	 * @param  ExpPoints
+	 *         The new experiencePoints for this Unit.
+	 * @post   The experiencePoints of this new Unit is equal to
+	 *         the given experiencePoints.
+	 *       | new.getExperiencePoints() == ExpPoints
+	 * @throws IllegalArgumentException
+	 *         The given experiencePoints is not a valid experiencePoints for any
+	 *         Unit.
+	 *       | ! isValidExperiencePoints(getExperiencePoints())
+	 */
+	public void addExperiencePoints(int ExpPoints) 
+			throws IllegalArgumentException {
+		if (! isValidExtraExperiencePoints(ExpPoints))
+			throw new IllegalArgumentException();
+		int ExpReward = (Math.floorMod(this.getExperiencePoints(),10) + ExpPoints)/
+								nbExpPointsForReward;
+		for (int i=0; i<ExpReward; i++){
+			double randomNumber = Math.random()*3;
+			if (Util.fuzzyLessThanOrEqualTo(randomNumber,1))
+				this.setStrength(this.getStrength()+1);
+			else if(Util.fuzzyLessThanOrEqualTo(randomNumber,2))
+				this.setAgility(this.getAgility()+1);
+			else
+				this.setToughness(this.getToughness()+1);
+		}// It is possible no extra points are given e.g. when strength is full and other attributes not
+		this.ExpPoints += ExpPoints;
+	}
+	
+	/**
+	 * Variable registering the experiencePoints of this Unit.
+	 */
+	private int ExpPoints = 0;
+	private static final int nbExpPointsForReward = 10;
+	
+	private final Faction faction;
+	
+	public Faction getFaction(){
+		return this.faction; //TODO, clone of niet?
+	}
+
+	public boolean isAlive() {
+		// TODO uitwerken!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		return false;
+	}
+
+	public void workAt(int x, int y, int z) {
+		// TODO uitwerken
+		
+	}
+
+	public boolean isCarryingLog() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public boolean isCarryingBoulder() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+}
+	

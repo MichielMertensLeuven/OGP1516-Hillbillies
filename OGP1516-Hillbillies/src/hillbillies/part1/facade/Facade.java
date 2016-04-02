@@ -1,6 +1,6 @@
 package hillbillies.part1.facade;
 
-import hillbillies.model.Unit;
+import hillbillies.model.unit.Unit;
 import ogp.framework.util.ModelException;
 
 public class Facade implements IFacade {
@@ -34,6 +34,7 @@ public class Facade implements IFacade {
 		try{return new Unit(name, initialPosition, weight, agility, strength, toughness,
 				enableDefaultBehavior);
 		}catch (IllegalArgumentException e){throw new ModelException("Invalid initialization");}
+		 catch (NullPointerException n){throw new ModelException("Invalid initialization");}
 	}
 	
 	/* Position */
