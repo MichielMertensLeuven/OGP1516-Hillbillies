@@ -2,10 +2,10 @@ package hillbillies.part2.internal.controller;
 
 import java.util.function.Consumer;
 
+import hillbillies.model.Boulder;
 import hillbillies.model.Faction;
-import hillbillies.model.materials.Boulder;
-import hillbillies.model.materials.Log;
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Log;
+import hillbillies.model.Unit;
 import hillbillies.part1.internal.controller.UnitInfoProviderPart1;
 import hillbillies.part2.facade.IFacade;
 import hillbillies.part2.internal.providers.IGameObjectInfoProvider;

@@ -1,7 +1,8 @@
 package hillbillies.model;
 
+import java.util.Arrays;
+
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.unit.Unit;
 import ogp.framework.util.Util;
 
 /**
@@ -234,6 +235,10 @@ public class Vector {
 		return new Vector(centre);
 	}
 	
+	public Vector getCubeCenter(){
+		return Vector.getCubeCenter(this.getCubeCoordinates());
+	}
+	
 	/**
 	 * Returns if delta is a valid step for moveToAdjacent.
 	 * 
@@ -256,10 +261,7 @@ public class Vector {
 				| isValidAdjoint(getCubeCoordinates()[1]-neighbour.getCubeCoordinates()[1]) &&
 				| (getCubeCoordinates()[2] == neighbour.getCubeCoordinates()[2]))
 	 */
-	public boolean isNeighboringCube(Vector neighbor){
-		if (!Unit.isValidCube(getCubeCoordinates()) ||
-				!Unit.isValidCube(neighbor.getCubeCoordinates()))
-			return false;
+	public boolean isDirectNeighboringCubeOnZLevel(Vector neighbor){
 		return (isValidAdjoint(this.getCubeCoordinates()[0]-neighbor.getCubeCoordinates()[0]) && 
 				isValidAdjoint(this.getCubeCoordinates()[1]-neighbor.getCubeCoordinates()[1]) &&
 				(this.getCubeCoordinates()[2] == neighbor.getCubeCoordinates()[2]));
@@ -351,7 +353,13 @@ public class Vector {
 	}
 	
 	public boolean isLessThanOrEqualTo(Vector compare) throws IllegalArgumentException{
-		return !this.isGreaterThanOrEqualTo(compare);
+		if (!this.isCompatible(compare))
+			throw new IllegalArgumentException();
+		for (int i=0;i<this.getLenght();i++){
+			if (!Util.fuzzyLessThanOrEqualTo(this.getVector()[i],compare.getVector()[i]))
+				return false;
+		}
+		return true;
 	}
 	
 	public boolean inRange(Vector minVector, Vector maxVector)
@@ -367,6 +375,12 @@ public class Vector {
 				return false;
 		}
 		return true;
+	}
+	
+	public boolean inCube(int[] cube) throws IllegalArgumentException{
+		if (cube.length != 3)
+			throw new IllegalArgumentException();
+		return Arrays.equals(this.getCubeCoordinates(),cube);
 	}
 
 	

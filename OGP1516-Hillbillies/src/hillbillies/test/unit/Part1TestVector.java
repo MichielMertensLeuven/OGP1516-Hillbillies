@@ -136,7 +136,7 @@ public class Part1TestVector {
 		Vector vector1 = new Vector(new double[] {1.4,2,8.8});
 		Vector vector2 = new Vector(new double[] {0.0,3.7,8.9});
 		assertTrue("These vectors are in neigboring cubes",
-				vector1.isNeighboringCube(vector2));
+				vector1.isDirectNeighboringCubeOnZLevel(vector2));
 	}
 	
 	@Test
@@ -144,7 +144,7 @@ public class Part1TestVector {
 		Vector vector1 = new Vector(new double[] {1.4,2.9,8.8});
 		Vector vector2 = new Vector(new double[] {0.0,4.1,8.9});
 		assertFalse("These vectors are not in neigboring cubes",
-				vector1.isNeighboringCube(vector2));
+				vector1.isDirectNeighboringCubeOnZLevel(vector2));
 	}
 	
 	@Test
@@ -152,7 +152,7 @@ public class Part1TestVector {
 		Vector vector1 = new Vector(new double[] {1.4,2.9,8.9});
 		Vector vector2 = new Vector(new double[] {0.0,2.4,9});
 		assertFalse("These vectors are not in neigboring cubes, because the z-level is different",
-				vector1.isNeighboringCube(vector2));
+				vector1.isDirectNeighboringCubeOnZLevel(vector2));
 	}
 
 	@Test
@@ -223,9 +223,9 @@ public class Part1TestVector {
 	public void testComparingEqualVector(){
 		Vector vector1 = new Vector(new double[] {1,2,3.5});
 		Vector vector2 = new Vector(new double[] {1,2,3.5});
-		assertTrue("Vectors are be equal",vector1.isGreaterThanOrEqualTo(vector2));
-		assertTrue("Vectors are be equal",vector1.isLessThanOrEqualTo(vector2));
-		assertTrue("Vectors are be equal",vector1.equals(vector2));
+		assertTrue("Vectors are equal",vector1.isGreaterThanOrEqualTo(vector2));
+		assertTrue("Vectors are equal",vector1.isLessThanOrEqualTo(vector2));
+		assertTrue("Vectors are equal",vector1.equals(vector2));
 	}
 	
 	@Test
@@ -244,6 +244,13 @@ public class Part1TestVector {
 		assertFalse("Vector1 is bigger",vector1.isGreaterThanOrEqualTo(vector2));
 		assertTrue("Vector1 is bigger",vector1.isLessThanOrEqualTo(vector2));
 		assertFalse("Vector1 is bigger",vector1.equals(vector2));
+	}
+	
+	@Test
+	public void testVectorInCube(){
+		int[] cube = new int[]{5,6,-2};
+		Vector vector = Vector.getCubeCenter(cube);
+		assertTrue("Vector in cube", vector.inCube(cube));
 	}
 	
 }

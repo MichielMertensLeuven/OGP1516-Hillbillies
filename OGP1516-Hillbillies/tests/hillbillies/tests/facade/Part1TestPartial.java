@@ -10,7 +10,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Unit;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
 import ogp.framework.util.ModelException;

@@ -1,4 +1,4 @@
-package hillbillies.model.unit;
+package hillbillies.model;
 
 /**
  * An enumeration of all the states a Unit can be into.
@@ -13,5 +13,6 @@ public enum State {
 	WORKING,
 	ATTACKING,
 	DEFENDING,
-	RESTING
+	RESTING,
+	FALLING
 }

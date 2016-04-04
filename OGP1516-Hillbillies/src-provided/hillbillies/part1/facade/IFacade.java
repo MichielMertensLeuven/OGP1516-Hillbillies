@@ -1,6 +1,6 @@
 package hillbillies.part1.facade;
 
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Unit;
 import ogp.framework.util.ModelException;
 
 /**

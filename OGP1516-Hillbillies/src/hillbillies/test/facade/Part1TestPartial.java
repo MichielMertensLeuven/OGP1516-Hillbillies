@@ -13,7 +13,8 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Unit;
+import hillbillies.model.World;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
 import ogp.framework.util.ModelException;
@@ -137,6 +138,9 @@ public class Part1TestPartial {
 		System.out.println(set3.toString());
 		assertTrue(set.contains(1));
 		assertTrue(set3.contains(2));
+//		int[][] list = World.getNeigbouringCubes(new int[]{5,8,3});
+//		System.out.println(Arrays.deepToString(list));
+		
 	}
 	
 	

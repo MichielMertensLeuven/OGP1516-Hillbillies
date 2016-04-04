@@ -1,6 +1,6 @@
 package hillbillies.part1.facade;
 
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Unit;
 import ogp.framework.util.ModelException;
 
 public class Facade implements IFacade {
@@ -401,7 +401,7 @@ public class Facade implements IFacade {
 	 */
 	public void moveTo(Unit unit, int[] cube) throws ModelException{
 		try{unit.moveTo(cube);}
-		catch (IllegalArgumentException e){throw new ModelException("Invalid position");}
+		catch (IllegalArgumentException e){throw new ModelException(e.getMessage());}
 		catch (IllegalStateException e){throw new ModelException("Not able to move");}
 	}
 

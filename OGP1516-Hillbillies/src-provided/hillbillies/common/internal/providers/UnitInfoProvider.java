@@ -2,7 +2,7 @@ package hillbillies.common.internal.providers;
 
 import java.util.Optional;
 
-import hillbillies.model.unit.Unit;
+import hillbillies.model.Unit;
 
 public interface UnitInfoProvider {
 
