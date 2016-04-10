@@ -20,7 +20,6 @@ public class Part1TestUnit {
 	// INITIALIZATION TESTING
 	// ----------------------
 
-// niet echt goede test, werkt niet, ook niet in unit!	
 	@Test
 	public void testIllegalUnitName(){
 		try{
@@ -132,14 +131,14 @@ public class Part1TestUnit {
 	public void testInitialAgilityTooLow(){
 		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 24, 50, 50, false);
 		assertTrue("An attribute value of 24 should be replaced with a valid value",
-				Unit.inRange(unit.getAgility(), 25, 100));
+				Helper.inRange(unit.getAgility(), 25, 100));
 	}
 
 	@Test
 	public void testInitialStrengthTooHigh(){
 		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 101, 50, false);
 		assertTrue("An attribute value of 101 should be replaced with a valid value",
-				Unit.inRange(unit.getStrength(), 25, 100));
+				Helper.inRange(unit.getStrength(), 25, 100));
 	}
 	
 	@Test
@@ -147,7 +146,7 @@ public class Part1TestUnit {
 		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
 		unit.setToughness(300);
 		assertTrue("An attribute value of 300 should be replaced with a valid value",
-				Unit.inRange(unit.getStrength(), 1, 200));
+				Helper.inRange(unit.getStrength(), 1, 200));
 	}
 
 	@Test
@@ -156,7 +155,7 @@ public class Part1TestUnit {
 		unit.setWeight(49);
 		assertTrue("A weight value of 49 should be replaced with a valid value,"
 				+ " when minimum weight is 50",
-				Unit.inRange(unit.getStrength(), 50, 200));
+				Helper.inRange(unit.getStrength(), 50, 200));
 	}
 	
 	// --------------

@@ -44,7 +44,7 @@ public class Vector {
 	 */
 	private final double[] vector;
 	
-	public int getLenght(){
+	public int getLength(){
 		return this.vector.length;
 	}
 	
@@ -57,10 +57,10 @@ public class Vector {
 	}
 	
 	public Vector addVector(Vector vectorToAdd) throws IllegalArgumentException{
-		if (this.getLenght() != vectorToAdd.getLenght())
+		if (this.getLength() != vectorToAdd.getLength())
 			throw new IllegalArgumentException();
 		double[] newVector = this.getVector();
-		for (int i=0; i<this.getLenght(); i++){
+		for (int i=0; i<this.getLength(); i++){
 			newVector[i] += vectorToAdd.getVector()[i];
 		}
 		return new Vector(newVector);
@@ -69,7 +69,7 @@ public class Vector {
 	
 	
 	private boolean isCompatible(Vector vectorToCompare){
-		return this.getLenght() == vectorToCompare.getLenght();
+		return this.getLength() == vectorToCompare.getLength();
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class Vector {
 		if (!this.isCompatible(target))
 			throw new IllegalArgumentException();
 		double distance = 0;
-		for (int i=0;i<this.getLenght();i++){
+		for (int i=0;i<this.getLength();i++){
 			distance += (this.getVector()[i]-target.getVector()[i])*
 						(this.getVector()[i]-target.getVector()[i]);
 		}
@@ -119,8 +119,8 @@ public class Vector {
 	public Vector stepDirection(Vector targetVector) throws IllegalArgumentException{
 		if (!this.isCompatible(targetVector))
 			throw new IllegalArgumentException();
-		double[] newVector = new double[this.getLenght()];
-		for (int i=0; i<this.getLenght(); i++){
+		double[] newVector = new double[this.getLength()];
+		for (int i=0; i<this.getLength(); i++){
 			newVector[i] = stepDirection(targetVector.getVector()[i],this.getVector()[i]);
 		}
 		return new Vector(newVector);
@@ -285,7 +285,7 @@ public class Vector {
 	 */
 	public Vector shift(double dx, double dy, double dz)
 			throws IllegalArgumentException{
-		if (this.getLenght() != 3)
+		if (this.getLength() != 3)
 			throw new IllegalArgumentException();
 		double[] toAdd = new double[] {dx,dy,dz};
 		Vector vectorToAdd = new Vector(toAdd);
@@ -302,7 +302,7 @@ public class Vector {
 	 */
 	public boolean isTheSameCube(Vector target){
 		if ((this.getCubeCoordinates() == null) || (target.getCubeCoordinates() == null) ||
-				(this.getLenght() != target.getLenght()))
+				(this.getLength() != target.getLength()))
 			return false;
 		for (int i=0;i<this.getCubeCoordinates().length;i++)
 			if (this.getCubeCoordinates()[i] != target.getCubeCoordinates()[i])
@@ -317,7 +317,7 @@ public class Vector {
 	
 	public Vector multiply(double factor){
 		double[] newVector = this.getVector();
-		for (int i=0; i<this.getLenght(); i++){
+		for (int i=0; i<this.getLength(); i++){
 			newVector[i] *= factor;
 		}
 		return new Vector(newVector);
@@ -326,8 +326,8 @@ public class Vector {
 	public Vector distanceVector(Vector target)throws IllegalArgumentException{
 		if (!this.isCompatible(target))
 			throw new IllegalArgumentException();
-		double[] newVector = new double[this.getLenght()];
-		for (int i=0; i<this.getLenght(); i++){
+		double[] newVector = new double[this.getLength()];
+		for (int i=0; i<this.getLength(); i++){
 			newVector[i] = target.getVector()[i] - this.getVector()[i];
 		}
 		return new Vector(newVector);
@@ -335,7 +335,7 @@ public class Vector {
 	
 	public double getMagnitude(){
 		double magnitude = 0.0;
-		for (int i=0; i<this.getLenght(); i++){
+		for (int i=0; i<this.getLength(); i++){
 			magnitude += this.getVector()[i]*this.getVector()[i];
 		}
 		magnitude = Math.sqrt(magnitude);
@@ -345,7 +345,7 @@ public class Vector {
 	public boolean isGreaterThanOrEqualTo(Vector compare) throws IllegalArgumentException{
 		if (!this.isCompatible(compare))
 			throw new IllegalArgumentException();
-		for (int i=0;i<this.getLenght();i++){
+		for (int i=0;i<this.getLength();i++){
 			if (!Util.fuzzyGreaterThanOrEqualTo(this.getVector()[i],compare.getVector()[i]))
 				return false;
 		}
@@ -355,7 +355,7 @@ public class Vector {
 	public boolean isLessThanOrEqualTo(Vector compare) throws IllegalArgumentException{
 		if (!this.isCompatible(compare))
 			throw new IllegalArgumentException();
-		for (int i=0;i<this.getLenght();i++){
+		for (int i=0;i<this.getLength();i++){
 			if (!Util.fuzzyLessThanOrEqualTo(this.getVector()[i],compare.getVector()[i]))
 				return false;
 		}
@@ -370,7 +370,7 @@ public class Vector {
 	public boolean equals(Vector compare) throws IllegalArgumentException{
 		if (!this.isCompatible(compare))
 			throw new IllegalArgumentException();
-		for (int i=0;i<this.getLenght();i++){
+		for (int i=0;i<this.getLength();i++){
 			if (!Util.fuzzyEquals(this.getVector()[i],compare.getVector()[i]))
 				return false;
 		}
@@ -381,6 +381,14 @@ public class Vector {
 		if (cube.length != 3)
 			throw new IllegalArgumentException();
 		return Arrays.equals(this.getCubeCoordinates(),cube);
+	}
+	
+	public boolean isOnEdge(){
+		for (int i=0;i<this.getLength();i++){
+			if (Util.fuzzyEquals(this.getVector()[i],Math.round(this.getVector()[i]),0.1))
+				return true;
+		}
+		return false;
 	}
 
 	

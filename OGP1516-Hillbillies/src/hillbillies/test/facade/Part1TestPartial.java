@@ -6,18 +6,24 @@ import static hillbillies.tests.util.PositionAsserts.assertIntegerPositionEquals
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import hillbillies.model.Helper;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
 import ogp.framework.util.ModelException;
+import ogp.framework.util.Util;
 
 public class Part1TestPartial {
 
@@ -122,30 +128,6 @@ public class Part1TestPartial {
 		assertDoublePositionEquals(2.5, 2.5, 2.5, facade.getPosition(unit));
 	}
 	
-	//TODO dit testje verwijderen.
-	@Test
-	public void kleinTestje(){
-		Set<Integer> set = new HashSet<Integer>();
-		Set<String> set2 = new HashSet<String>();
-		Set<Integer> set3 = new HashSet<Integer>(Arrays.asList(new Integer[]{1,2}));
-		set2.add("aha");
-//		assertTrue(set.contains((Integer) 1));
-		assertTrue(set2.contains("aha"));
-		set.add(1);
-		System.out.println(set.toString());
-		set.add(2);
-		System.out.println(set.toString());
-		System.out.println(set3.toString());
-		assertTrue(set.contains(1));
-		assertTrue(set3.contains(2));
-//		int[][] list = World.getNeigbouringCubes(new int[]{5,8,3});
-//		System.out.println(Arrays.deepToString(list));
-		
-	}
-	
-	
-	
-
 	/**
 	 * Helper method to advance time for the given unit by some time.
 	 * 
@@ -160,7 +142,4 @@ public class Part1TestPartial {
 			facade.advanceTime(unit, step);
 		facade.advanceTime(unit, time - n * step);
 	}
-	
-	
-
 }

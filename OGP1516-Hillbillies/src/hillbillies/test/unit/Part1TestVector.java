@@ -1,21 +1,13 @@
 package hillbillies.test.unit;
 
-//import static hillbillies.tests.util.PositionAsserts.*;
-
 import static org.junit.Assert.*;
 
-//import org.junit.After;
-//import org.junit.AfterClass;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.model.*;
 import ogp.framework.util.Util;
 
 public class Part1TestVector {
-	// vector with false lenght
 	@Test
 	public void testVectorWithLength(){
 		Vector vector1 = new Vector(3);
@@ -27,7 +19,7 @@ public class Part1TestVector {
 	@Test
 	public void testGetLength(){
 		Vector vector = new Vector(7);
-		assertEquals("The length of this vector is 7",vector.getLenght(),7);
+		assertEquals("The length of this vector is 7",vector.getLength(),7);
 	}
 	
 	@Test

@@ -1,29 +1,12 @@
 package hillbillies.model;
-// TODO: zééér belangrijk: gameobject uitwerken!
-// TODO WHEN UNIT CREATED VALID POSITION, ALSO NOT FALLING POSTION???
-// TODO: wat te doen met setposition etc, staat nu public omdat gameobject?s
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-// TODO: isAlive & work at uitwerken!!!!!!!!!!!!!!!!
-// TODO: moet er rekeining gehouden worden met units die niet in de wereld geïnitialiseerd
-//		 worden, bv met een faction?
-// TODO: throws subfunctie ook vanboven erbij!!
-// TODO: testcase for Unit
-// TODO: Position naar vectorClass -> @Value
-// TODO: maar snelle constructor voor unit zie hoorcollege6 dog
-// eens leuk self adaptive systems, tekenprogramma
-// Integer: referentie boxing, int: value unboxing
-// TODO: checken op overflows!!
-// TODO: protected nakijken
-// TODO: checken of final gebruiken.
-// TODO: what if dt changes in multiple aanroepingen
-
 import java.util.Scanner;
+
 import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.*;
 import ogp.framework.util.*;
@@ -105,15 +88,14 @@ public class Unit extends GameObject{
 			int strength, int toughness, boolean enableDefaultBehavior, Faction faction){
 		super(Vector.getCubeCenter(initialPosition));
 		this.setName(name);
-		this.setPosition(Vector.getCubeCenter(initialPosition));
 		this.setAgility(correctInitialAttribute(agility));
 		this.setStrength(correctInitialAttribute(strength));
 		this.setToughness(correctInitialAttribute(toughness));
 		this.setWeight(correctInitialAttribute(weight));
 		this.setOrientation(Unit.defaultOrientation);
+		// Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
 		this.setHitPoints((int) (0.8*this.getMaxHitPoints()));
 		this.setStaminaPoints((int) (0.8*this.getMaxStaminaPoints()));
-		 // Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
 		this.defaultBehaviorEnabled = enableDefaultBehavior;
 		this.setState(State.IDLE);
 		if (!faction.addUnit(this))
@@ -123,85 +105,9 @@ public class Unit extends GameObject{
 	
 	public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior){
-		super(Vector.getCubeCenter(initialPosition));
-		this.setName(name);
-		this.setPosition(Vector.getCubeCenter(initialPosition));
-		this.setAgility(correctInitialAttribute(agility));
-		this.setStrength(correctInitialAttribute(strength));
-		this.setToughness(correctInitialAttribute(toughness));
-		this.setWeight(correctInitialAttribute(weight));
-		this.setOrientation(Unit.defaultOrientation);
-		this.setHitPoints((int) (0.8*this.getMaxHitPoints()));
-		this.setStaminaPoints((int) (0.8*this.getMaxStaminaPoints()));
-		 // Unit gets 80% of the maximum hitPoints/staminaPoints at initialization
-		this.defaultBehaviorEnabled = enableDefaultBehavior;
-		this.setState(State.IDLE);
-		Faction faction = new Faction(); 
-		if (!faction.addUnit(this))
-			throw new IllegalArgumentException();
-		this.faction = faction;
+		this(name, initialPosition, weight, agility, strength, toughness,
+				enableDefaultBehavior, new Faction());
 	}
-	
-	/**
-	 * Variable registering the position of the Unit.
-	 */
-    private Vector position;
-    
-	/**
-	 * Set the position of this Unit to the given position.
-	 * 
-	 * @param  position
-	 *         The new position for this Unit.
-	 * @post   The position of this new Unit is equal to
-	 *         the given position.
-	 *         | new.getPosition() == position
-	 */
-    // TODO hier correcte coordinaten checken!!
-	@Raw
-    public void setPosition(Vector position) throws IllegalArgumentException{
-    	if (this.getWorld() != null){
-    		if(!this.getWorld().isValidPosition(position))
-    			throw new IllegalArgumentException("Position not in world boundaries");
-    		else if (!this.getWorld().isPassable(position))
-    			throw new IllegalArgumentException("Not passable position");
-    	}
-		this.position = position;
-    }
-	
-    
-	/**
-	 * Returns the position of this Unit.
-	 */
-	@Raw @Basic @Override
-    public Vector getPosition() {
-    	return this.position;
-    }
-	
-//	/**
-//	 * Check whether the given Vector is a valid Vector for
-//	 * any Unit.
-//	 *  
-//	 * @param  	coordinates
-//	 *         	The coordinates to check.
-//	 * @return 	The validity of the coordinates
-//	 *       	| if (coordinates == null || coordinates.length != 3)
-//	 *       	|	 then result == false
-//	 *       	| if (for (int i=0; i<3; i++) (0<=coordinates[i]<maxCube[i]+1))
-//	 *       	|	 then result == true
-//	*/
-//	public static boolean isValidPosition(Vector position) {
-//		if (position == null || position.getLenght() != 3)
-//			return false;
-//		return (position.isGreaterThanOrEqualTo(minPosition) &&
-//				position.isLessThanOrEqualTo(maxPosition));
-//	}
-	
-//	public static boolean isValidCube(int[] cube){
-//		return isValidPosition(Vector.getCubeCenter(cube));
-//	}
-	
-//	private static final Vector maxPosition = new Vector(new double[] {50,50,50});
-//	private static final Vector minPosition = new Vector(new double[3]);
 	
 	/**
 	 * Calculates the orientation between this Vector and
@@ -245,6 +151,28 @@ public class Unit extends GameObject{
      */
     private double lastOrientationBeforeInterruption = Unit.defaultOrientation; 
 
+	public boolean isStateTransitionAllowed(State targetState) {
+		boolean isStateTransitionRefused = false;
+		switch (targetState) {
+		case WORKING:
+			isStateTransitionRefused = this.isFalling() || this.isWorking() || this.isMoving() || this.isDefending() || this.isAttacking() || this.isRecovering();
+			break;
+		case ATTACKING:
+		case DEFENDING:
+			isStateTransitionRefused = this.isFalling() || this.isAttacking() || this.isDefending();
+			break;
+		case RESTING:
+			isStateTransitionRefused = !this.isState(State.IDLE);
+			break;
+		case FALLING:
+		case MOVING:
+		case IDLE:
+		default:
+			break;
+		}
+		return !isStateTransitionRefused;
+	}
+
     /**
      * Change the State of this Unit to state.
      * 
@@ -257,7 +185,7 @@ public class Unit extends GameObject{
      * @post	The orientation of the Unit before switching its orientation is registered.
      * 			| (new.lastOrientationBeforeInterruption = this.getOrientation())
      */
-    @Raw //TODO zeker?
+    @Raw
     private void setState(State state) {
 		this.lastStateBeforeInterruption = this.getState();
 		this.lastOrientationBeforeInterruption = this.getOrientation();
@@ -284,49 +212,9 @@ public class Unit extends GameObject{
     	return this.state;
     }
     
-	/**
-	 * Checks whether the value lies between a minimum value and a maximum value.
-	 * 
-	 * @pre		minValue is smaller than maxValue.
-	 * 			| (minValue <= maxValue)
-	 * @param 	value
-	 * 			The value to be checked.
-	 * @param 	minValue
-	 * 			The minimum value.
-	 * @param 	maxValue
-	 * 			The maximum value.
-	 * @return	Whether value is in the range between minValue and maxValue
-	 * 			| result == (minValue <= value) && (value <= maxValue))
-	 */
-    @Model
-	public static boolean inRange(int value, int minValue, int maxValue) {
-		assert(minValue <= maxValue);
-		return ((minValue <= value) && (value <= maxValue));
-	}
 	
-	/**
-	 * Clips the value between minValue and maxValue
-	 * 
-	 * @param 	value
-	 * 			The value that needs to be clipped.
-	 * @param 	minValue
-	 * 			The minimum value.
-	 * @param 	maxValue
-	 * 			The maximum value.
-	 * @return	The clipped value, i.e. the value if inRange(Value,minValue,maxValue)
-	 * 			otherwise, the value in the range that is closest to value.
-	 * 			| if (value > maxValue) then result == maxValue
-	 * 			| else if (value < minValue) then result == minValue
-	 * 			| else result == value
-	 */
-    @Model
-	private static int clip(int value, int minValue, int maxValue){
-		if (value > maxValue)
-			value = maxValue;
-		else if (value <minValue)
-			value = minValue;
-		return value;
-	}
+	
+
 	
 	/**
 	 * Corrects the value of an attribute to make sure
@@ -341,7 +229,7 @@ public class Unit extends GameObject{
 	 * 			| else result == 25
 	 */
 	private static int correctInitialAttribute(int value){
-		return clip(value, 25, 100);
+		return Helper.clip(value, 25, 100);
 	}
 
 	/**
@@ -370,7 +258,7 @@ public class Unit extends GameObject{
 	
 	/**
 	 * A string containing the syntax of a valid name using a regular expression:
-	 * start ^ wit a capital A-Z, followed by at least one letter, space or quote (until the end $)
+	 * start ^ with a capital A-Z, followed by at least one letter, space or quote (until the end $)
 	 */
 	private final static String validSyntaxOfName = "^[A-Z][a-zA-Z\'\" ]+$";
 	
@@ -410,6 +298,10 @@ public class Unit extends GameObject{
 	public int getWeight() {
 		return this.weight;
 	}
+	
+	public int getTotalWeight(){
+		return this.getWeight() + this.getCarryingWeight();
+	}
 
 	/**
 	 * Set the weight of this Unit to the given weight.
@@ -423,7 +315,7 @@ public class Unit extends GameObject{
 	 */
 	@Raw
 	public void setWeight(int weight) {
-		this.weight = clip(weight, this.getMinWeight(), maxWeight);
+		this.weight = Helper.clip(weight, this.getMinWeight(), maxWeight);
 		this.updateStaminaPoints(); // setting the weight has a side effect on the max stamina points!
 		this.updateHitPoints();     // setting the weight has a side effect on the max hit points!
 	}
@@ -477,7 +369,7 @@ public class Unit extends GameObject{
 	 */
 	@Raw
 	public void setStrength(int strength) {
-		this.strength = clip(strength, minStrength, maxStrength);
+		this.strength = Helper.clip(strength, minStrength, maxStrength);
 		updateWeight(); // setting the strength has a side effect on the minimal weight!
 	}
 	
@@ -516,7 +408,7 @@ public class Unit extends GameObject{
 	 */
 	@Raw
 	public void setAgility(int agility) {
-		this.agility = clip(agility, minAgility, maxAgility);
+		this.agility = Helper.clip(agility, minAgility, maxAgility);
 		this.updateWeight(); // setting the agility has a side effect on the minimal weight!
 	}
 	
@@ -555,7 +447,7 @@ public class Unit extends GameObject{
 	 */
 	@Raw
 	public void setToughness(int toughness) {
-		this.toughness = clip(toughness, minToughness, maxToughness);
+		this.toughness = Helper.clip(toughness, minToughness, maxToughness);
 		this.updateStaminaPoints(); // setting the toughness has a side effect on the max stamina points!
 		this.updateHitPoints();     // setting the toughness has a side effect on the max hit points!
 	}
@@ -574,8 +466,6 @@ public class Unit extends GameObject{
 	 * A variable containing the maximum toughness for all units.
 	 */
 	private final static int maxToughness = 200;
-//  could be done in a more efficient way, using inheritance, but this topic is
-//	still to see in contact sessions.
 
 	/**
 	 * Return the maximum stamina points this Unit can have.
@@ -616,7 +506,7 @@ public class Unit extends GameObject{
 	 * used when the max stamina points is adapted.
 	 */
 	private void updateStaminaPoints(){
-		int newStaminaPoints = clip(this.getCurrentStaminaPoints(),
+		int newStaminaPoints = Helper.clip(this.getCurrentStaminaPoints(),
 				minStaminaPoints, this.getMaxStaminaPoints());
 		this.setStaminaPoints(newStaminaPoints);
 	}
@@ -632,7 +522,7 @@ public class Unit extends GameObject{
 	 */
 	@Raw
 	private boolean isValidStaminaPoints(int staminaPoints){
-		return inRange(staminaPoints, minStaminaPoints, this.getMaxStaminaPoints());
+		return Helper.inRange(staminaPoints, minStaminaPoints, this.getMaxStaminaPoints());
 	}
 	
 	/**
@@ -676,6 +566,17 @@ public class Unit extends GameObject{
 	private void setHitPoints(int hitPoints){
 		assert isValidHitPoints(hitPoints);
 		this.hitPoints = hitPoints;
+		if (hitPoints <= Unit.minHitPoints && this.getWorld() != null)
+			this.kill();
+	}
+	
+	//TODO finish
+	private void kill(){
+		this.isAlive = false;
+		// this.getFaction().removeUnit(this);
+		// should this be done? Unit must always belong to a faction?
+		if (this.getWorld() != null)
+			this.getWorld().removeGameObjectFromWorld(this);
 	}
 	
 	/**
@@ -683,7 +584,7 @@ public class Unit extends GameObject{
 	 * used when the max hit points is adapted.
 	 */
 	private void updateHitPoints(){
-		int newHitPoints = clip(this.getCurrentHitPoints(), minHitPoints, this.getMaxHitPoints());
+		int newHitPoints = Helper.clip(this.getCurrentHitPoints(), minHitPoints, this.getMaxHitPoints());
 		this.setHitPoints(newHitPoints);
 	}
 	
@@ -697,78 +598,10 @@ public class Unit extends GameObject{
 	 * 			| result == (hitPoints >= minHitPoints) &&
 	 * 			| (hitPoints <= this.getMaxHitPoints())
 	 */
-	@Raw //TODO? vragen aan jasper ook bij staminapoints
+	@Raw
 	private boolean isValidHitPoints(int hitPoints){
-		return inRange(hitPoints, minHitPoints, this.getMaxHitPoints());
+		return Helper.inRange(hitPoints, minHitPoints, this.getMaxHitPoints());
 	}
-	
-	//TODO EVT pathfinder class maken en deeptostring niet heel de tijd
-	private Map<String, Integer> pathFinder = new HashMap<>();
-	
-	private Integer getPathfinderValue(Integer[] cube){
-		return this.pathFinder.get(Arrays.deepToString(cube));
-	}
-	
-	private void addToPathfinder(Integer[] cube, int nbSteps){
-		this.pathFinder.put(Arrays.deepToString(cube), nbSteps);
-	}
-	
-	private boolean pathfinderContains(Integer[] cube){
-		return this.pathFinder.containsKey(Arrays.deepToString(cube));
-	}
-	
-	private void clearPathfinder(){
-		this.pathFinder = new HashMap<>();
-	}
-	
-	private ArrayList<Integer[]> searchPathStep(Integer[] cube, int numberSteps){
-		ArrayList<Integer[]> nextSteps = new ArrayList<>();
-		for (Integer[] nextCube: this.getWorld().getNeigbouringCubes(cube)){
-			if (this.isStandableCube(Unit.converter(nextCube))){
-				if (this.getPathfinderValue(nextCube) == null ||
-					this.getPathfinderValue(nextCube) > numberSteps+1){ //TODO CHECK +1 <=??
-					nextSteps.add(nextCube);
-				}
-			}
-		}
-		return nextSteps;
-	}
-	
-	private boolean isStandableCube(int[] cube) throws IllegalArgumentException{
-		int x = cube[0];
-		int y = cube[1];
-		int z = cube[2];
-		if (!this.getWorld().isValidCube(x, y, z))
-			throw new IllegalArgumentException();
-		return (this.getWorld().isPassable(x,y,z) && 
-				this.getWorld().hasSolidNeighbour(cube));
-	}
-	
-	
-	
-	
-	private boolean setPath(Integer[] target, Integer[] current){ //TODO checken of wanneer foute cube ingeeft!{
-		this.clearPathfinder();
-		this.addToPathfinder(target, 0);
-		ArrayList<Integer[]> nextSteps = new ArrayList<>();
-		nextSteps.add(target);
-		ArrayList<Integer[]> foundCubes = new ArrayList<>();
-		int nbSteps = 0;
-		while (!this.pathfinderContains(current) && !nextSteps.isEmpty()){
-			for (Integer[] nextCube: nextSteps){
-				foundCubes.addAll(this.searchPathStep(nextCube, nbSteps));
-			}
-			nbSteps += 1;
-			for (Integer[] foundCube: foundCubes){
-				this.addToPathfinder(foundCube, nbSteps);
-			}
-			nextSteps.clear();
-			nextSteps.addAll(foundCubes);
-			foundCubes.clear();
-		}
-		return this.pathfinderContains(current);		
-	}
-	
 	
 	/**
 	 * Variable registering the hit points of this Unit.
@@ -780,6 +613,8 @@ public class Unit extends GameObject{
 	 */
 	private final static int minHitPoints = 0;
 
+	
+	
 	/**
 	 * Return if dt is a legal duration for all Units.
 	 * 
@@ -788,7 +623,6 @@ public class Unit extends GameObject{
 	 * @return	The validity of dt.
 	 * 			| result == ((dt>0) && (dt <0.2))
 	 */
-	//TODO GEEN 2 KEER BIJ WORLD AND UNIT
 	private static boolean isValidDuration(double dt){
 		return (dt>0) && (Util.fuzzyLessThanOrEqualTo(dt, 0.2));
 	}
@@ -829,11 +663,15 @@ public class Unit extends GameObject{
 	 * 			| (!isValidDuration(duration))
 	 */
 	public void advanceTime(double duration) throws IllegalArgumentException{
-		if (!isValidDuration(duration))
+		if (!this.isAlive())
+			throw new IllegalStateException("Unit not alive");
+		if (!Unit.isValidDuration(duration))
 			throw new IllegalArgumentException(Double.toString(duration));
 		this.timeToStartResting -= duration;
-		if (!this.isFalling() && this.isFallingPosition(this.getPosition()))
-			this.fall();
+		// trigger falling when conditions met
+		if (!this.isFalling() && this.isFallingPosition(this.getPosition()) &&
+				!this.getPosition().isOnEdge())
+			this.startFalling();
 		switch (this.getState()) {
 		case FALLING:
 			this.finishFalling(duration);
@@ -861,7 +699,9 @@ public class Unit extends GameObject{
 		default:
 			break;
 		}
-		if (this.timeToStartResting < 0) {
+		// Unit must rest once in a specified time period
+		if (this.timeToStartResting < 0 && !this.isFalling() && 
+				!this.isAttacking() && !this.isDefending()) {
 			this.forceRest();
 		}
 	}
@@ -880,25 +720,21 @@ public class Unit extends GameObject{
 	 * 			| (new.timeToWork == 0)
 	 */
 	private void finishFalling(double duration){
-		if (this.distanceToFall > duration*GameObject.getFallingVelocity()){
-			this.distanceToFall -= duration*GameObject.getFallingVelocity();
-			this.setPosition(this.getPosition().shift(0, 0, -duration*GameObject.getFallingVelocity()));
-		} else{
-			int newHitpoints = Unit.clip(this.getCurrentHitPoints() - 10*this.levelsToFall,
+		if (!this.advanceFalling(duration)){
+			int newHitpoints = Helper.clip(this.getCurrentHitPoints() - 10*this.levelsToFall,
 					Unit.minHitPoints,this.getMaxHitPoints());
 			this.setHitPoints(newHitpoints);
-			this.distanceToFall = 0;
 			this.levelsToFall = 0;
 			this.setState(State.IDLE);
 		}
 	}
 	
-	private void fall(){
+	@Override
+	protected void startFalling(){
+		super.startFalling();
 		this.setState(State.FALLING);
 		this.setOrientation(Unit.defaultOrientation);
-		double fallingDistance = this.getDistanceToFall();
-		this.levelsToFall = (int) fallingDistance;
-		this.distanceToFall = fallingDistance;
+		this.levelsToFall = (int) this.getDistanceToFall();
 	}
 		
 	@Override
@@ -907,15 +743,14 @@ public class Unit extends GameObject{
 		if (this.getWorld() == null)
 			throw new NullPointerException();
 		return (!this.isStandableCube(currentPosition.getCubeCoordinates()));
-//		return (!this.getWorld().hasSolidNeighbour(currentPosition.getCubeCoordinates()));
 	}
 	
-	private boolean isFalling(){
+	@Override
+	public boolean isFalling(){
 		return this.isState(State.FALLING);
 	}
 	
 	private int levelsToFall = 0;
-	private double distanceToFall = 0;
 	
 	/**
 	 * Variable registering the time since the last rest.
@@ -988,7 +823,7 @@ public class Unit extends GameObject{
 	 * 			|	(200.0*this.getWeight()/100.0)
 	 */
 	private double getBaseSpeed(){
-		return 1.5*(this.getStrength()+this.getAgility())/(200.0*this.getWeight()/100.0);
+		return 1.5*(this.getStrength()+this.getAgility())/(200.0*this.getTotalWeight()/100.0);
 	}
 	
 	/**
@@ -1202,7 +1037,6 @@ public class Unit extends GameObject{
 	 * @note	The movement to the center of the cube goes in
 	 * 			multiple succssive steps.
 	 */
-	//TODO OVERAL WAAR [0] ETC IETS GOED OP VERZINNEN8!
 	public void moveTo(int[] cube) throws IllegalArgumentException{
 		if (!this.getWorld().isValidCube(cube[0], cube[1], cube[2]))
 			throw new IllegalArgumentException("Selected cube not in gameworld");
@@ -1210,22 +1044,19 @@ public class Unit extends GameObject{
 			throw new IllegalArgumentException("Can not stand on selected cube");
 		if (Arrays.equals(cube, this.getPosition().getCubeCoordinates()))
 			throw new IllegalArgumentException("Already standing on selected cube");
-		boolean result = this.setPath(Unit.converter(cube), Unit.converter(this.getPosition().getCubeCoordinates()));
-		this.targetPosition = Vector.getCubeCenter(cube);
-		this.hasTriedSprintingDuringThisMove = false;
-//		Vector step = this.getPosition().stepDirection(targetPosition);
-//		Vector shortTermTarget = this.getPosition().addVector(step); 
-//		Vector shortTermTargetCenter = Vector.getCubeCenter(shortTermTarget.getCubeCoordinates()); // Always walk through the centers of the grid
+		boolean result = this.setPath(Helper.converter(cube), Helper.converter(this.getPosition().getCubeCoordinates()));
 		if (!result)
 			throw new IllegalArgumentException("Position not reachable");
-		this.setShortTermTarget(Vector.getCubeCenter(this.getNextStepPath(Unit.converter(this.getPosition().getCubeCoordinates()))));
+		this.targetPosition = Vector.getCubeCenter(cube);
+		this.hasTriedSprintingDuringThisMove = false;
+		this.setShortTermTarget(Vector.getCubeCenter(this.getNextStepPath(Helper.converter(this.getPosition().getCubeCoordinates()))));
 	}
 	
 	public int[] getNextStepPath(Integer[] current) throws IllegalStateException{
 		if (!this.pathfinderContains(current))
 			throw new IllegalStateException();
 		Integer[] currentBest = null;
-		for (Integer[] neighbour: this.getWorld().getNeigbouringCubes(current)){
+		for (Integer[] neighbour: this.getWorld().getValidNeigbouringCubes(current)){
 			if (this.getPathfinderValue(neighbour) != null){
 				if (currentBest == null || this.getPathfinderValue(neighbour) < this.getPathfinderValue(currentBest)){
 					currentBest = neighbour;
@@ -1234,27 +1065,81 @@ public class Unit extends GameObject{
 		}
 		if (currentBest == null)
 			return null;
-		return Unit.converter(currentBest);
+		return Helper.converter(currentBest);
 	}
 	
+private Map<String, Integer> pathFinder = new HashMap<>();
 	
+	private Integer getPathfinderValue(Integer[] cube){
+		return this.pathFinder.get(Arrays.deepToString(cube));
+	}
 	
-	//TODO utility class maken
-	public static Integer[] converter(int[] toConvert){
-		Integer[] result = new Integer[toConvert.length];
-		for (int i=0; i<toConvert.length; i++){
-			result[i] = new Integer(toConvert[i]);
+	private boolean addToPathfinder(Integer[] cube, int nbSteps){
+		boolean shouldAdd = true;
+		if (this.getPathfinderValue(cube) != null && this.getPathfinderValue(cube) <= nbSteps)
+			shouldAdd = false;
+		if (shouldAdd)
+			this.pathFinder.put(Arrays.deepToString(cube), nbSteps);
+		return shouldAdd;
+		
+	}
+	
+	private boolean pathfinderContains(Integer[] cube){
+		return this.pathFinder.containsKey(Arrays.deepToString(cube));
+	}
+	
+	private void clearPathfinder(){
+		this.pathFinder = new HashMap<>();
+	}
+	
+	private ArrayList<Integer[]> searchPathStep(Integer[] cube, int numberSteps){
+		ArrayList<Integer[]> nextSteps = new ArrayList<>();
+		for (Integer[] nextCube: this.getWorld().getValidNeigbouringCubes(cube)){
+			if (this.isStandableCube(Helper.converter(nextCube))){
+				if (this.getPathfinderValue(nextCube) == null ||
+					this.getPathfinderValue(nextCube) > numberSteps+1){
+					nextSteps.add(nextCube);
+				}
+			}
 		}
-		return result;
+		return nextSteps;
 	}
 	
-	public static int[] converter(Integer[] toConvert){
-		int[] result = new int[toConvert.length];
-		for (int i=0; i<toConvert.length; i++){
-			result[i] = toConvert[i].intValue();
-		}
-		return result;
+	private boolean isStandableCube(int[] cube) throws IllegalArgumentException{
+		int x = cube[0];
+		int y = cube[1];
+		int z = cube[2];
+		if (!this.getWorld().isValidCube(x, y, z))
+			throw new IllegalArgumentException();
+		return (this.getWorld().isPassable(x,y,z) && 
+				this.getWorld().hasSolidNeighbour(cube));
 	}
+	
+	
+	
+	
+	private boolean setPath(Integer[] target, Integer[] current){
+		this.clearPathfinder();
+		this.addToPathfinder(target, 0);
+		ArrayList<Integer[]> nextSteps = new ArrayList<>();
+		nextSteps.add(target);
+		ArrayList<Integer[]> foundCubes = new ArrayList<>();
+		int nbSteps = 0;
+		while (!this.pathfinderContains(current) && !nextSteps.isEmpty()){
+			for (Integer[] nextCube: nextSteps){
+				foundCubes.addAll(this.searchPathStep(nextCube, nbSteps));
+			}
+			nbSteps += 1;
+			nextSteps.clear();
+			for (Integer[] foundCube: foundCubes){
+				if (this.addToPathfinder(foundCube, nbSteps))
+					nextSteps.add(foundCube);
+			}
+			foundCubes.clear();
+		}
+		return this.pathfinderContains(current);		
+	}
+
 	
 	/**
 	 * Function to move this Unit to center of the given valid, adjacent cube.
@@ -1377,11 +1262,10 @@ public class Unit extends GameObject{
 	 *			|  	this.isDefending() || this.isAttacking() || this.isRecovering())
 	 */
 	public void startWorking() throws IllegalStateException{
-		if (this.isFalling() ||this.isWorking() || this.isMoving() ||
-				this.isDefending() || this.isAttacking() || this.isRecovering())
-					throw new IllegalStateException();
+		if (!this.isStateTransitionAllowed(State.WORKING))
+			throw new IllegalStateException("from " + this.getState().toString() + " to WORKING");
 		this.setState(State.WORKING);
-		this.timeToWork = (100.0/this.getStrength()); //TODO TERUGZETTEN NAAR 500.0/..
+		this.timeToWork = (500.0/this.getStrength());
 	}
 	
 	public void work() throws NullPointerException{
@@ -1389,7 +1273,7 @@ public class Unit extends GameObject{
 			throw new NullPointerException();
 		List<Integer[]> possibleWorkingPlaces = this.getSurroundingCubes(this.getPosition());
 		int nbPossiblePlaces = possibleWorkingPlaces.size();
-		int[] randomPos = Unit.converter(possibleWorkingPlaces.get(
+		int[] randomPos = Helper.converter(possibleWorkingPlaces.get(
 				(int) (Math.random()*nbPossiblePlaces)));
 		this.workAt(randomPos[0], randomPos[1], randomPos[2]);
 	}
@@ -1403,15 +1287,15 @@ public class Unit extends GameObject{
 	}
 	
 	private List<Integer[]> getSurroundingCubes(Vector position){
-		List<Integer[]> surroundingCubes = this.getWorld().getNeigbouringCubes(
-				Unit.converter(this.getPosition().getCubeCoordinates()));
-		surroundingCubes.add(Unit.converter(this.getPosition().getCubeCoordinates()));
+		List<Integer[]> surroundingCubes = this.getWorld().getValidNeigbouringCubes(
+				Helper.converter(this.getPosition().getCubeCoordinates()));
+		surroundingCubes.add(Helper.converter(this.getPosition().getCubeCoordinates()));
 		return surroundingCubes;
 	}
 	
 	private boolean containsCube(List<Integer[]> list, int[] cubeToInspect){
 		for (Integer[] cube: list){
-			if (Arrays.equals(Unit.converter(cube),cubeToInspect))
+			if (Arrays.equals(Helper.converter(cube),cubeToInspect))
 				return true;
 		}
 		return false;
@@ -1419,10 +1303,10 @@ public class Unit extends GameObject{
 	
 	private int[] workingSpace;
 	
-	public void finishWorkAt(int x, int y, int z) throws IllegalStateException{
+	private void finishWorkAt(int x, int y, int z) throws IllegalStateException{
 		if (!this.isWorking())
 			throw new IllegalStateException();
-		if (this.isCarryingLog() || this.isCarryingBoulder())
+		if (this.canDropMaterial(x, y, z))
 			this.dropMaterial(x,y,z);
 		else if (this.getWorld().isValidWorkshop(x, y, z))
 			this.workshop(x,y,z);
@@ -1433,6 +1317,11 @@ public class Unit extends GameObject{
 		else if (this.getWorld().isSolid(x,y,z))
 			this.getWorld().collapseCube(x,y,z);
 		this.addExperiencePoints(10);
+	}
+	
+	public boolean canDropMaterial(int x,int y, int z){
+		return this.getWorld().isPassable(x, y, z) &&
+				(this.isCarryingLog() || this.isCarryingBoulder());
 	}
 	
 	private void workshop(int x, int y, int z) throws IllegalArgumentException{
@@ -1451,8 +1340,7 @@ public class Unit extends GameObject{
 		if (!this.getWorld().cubeHasBoulder(x, y, z))
 			throw new IllegalArgumentException();
 		Boulder boulder = this.getWorld().getBoulderOn(x, y, z);
-		this.isCarryingBoulder = true;
-		this.carryingWeigth = boulder.getWeight();
+		this.carryingMaterial = boulder;
 		this.getWorld().removeGameObjectFromWorld(boulder);
 	}
 	
@@ -1460,33 +1348,27 @@ public class Unit extends GameObject{
 		if (!this.getWorld().cubeHasLog(x, y, z))
 			throw new IllegalArgumentException();
 		Log log = this.getWorld().getLogOn(x, y, z);
-		this.isCarryingLog = true;
-		this.carryingWeigth = log.getWeight();
+		this.carryingMaterial = log;
 		this.getWorld().removeGameObjectFromWorld(log);
 	}
 	
-	private void dropMaterial(int x, int y, int z) throws IllegalStateException{
-		if (!this.isCarryingBoulder() && !this.isCarryingLog())
+	private void dropMaterial(int x, int y, int z) throws IllegalStateException, IllegalArgumentException{
+		if (!this.canDropMaterial(x, y, z))
 			throw new IllegalStateException();
 		Vector cubeCenter = Vector.getCubeCenter(new int[]{x,y,z});
-		if (this.isCarryingBoulder()){
-			this.getWorld().addGameObjectToWorld(
-					new Boulder(cubeCenter,this.getCarryingWeight()));
-			this.isCarryingBoulder = false;
-		}
-		else{
-			this.getWorld().addGameObjectToWorld(
-					new Log(cubeCenter,this.getCarryingWeight()));
-			this.isCarryingLog = false;
-		}
-		this.carryingWeigth = 0;
+		this.carryingMaterial.setPosition(cubeCenter);
+		if (!this.getWorld().addGameObjectToWorld(this.carryingMaterial))
+			throw new IllegalArgumentException("Not able to drop material here");
+		this.carryingMaterial = null;
 	}
 	
 	private int getCarryingWeight(){
-		return this.carryingWeigth;
+		if (this.carryingMaterial == null)
+			return 0;
+		return this.carryingMaterial.getWeight();
 	}
 	
-	private int carryingWeigth = 0;
+	private Material carryingMaterial = null;
 	
 	
 	/**
@@ -1571,12 +1453,13 @@ public class Unit extends GameObject{
 	 */
 	public void fight(Unit defender) throws IllegalStateException,
 	IllegalArgumentException{
-		if (this.isFalling() || this.isAttacking() || this.isDefending() ||
-				defender.isFalling() || defender.isAttacking() || defender.isDefending() ||
+		if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
 				(defender == this))
-			throw new IllegalStateException();
+			throw new IllegalStateException("from " + this.getState().toString() + " to FIGHTING");
 		if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Invalid position to fight");
+		if (this.getFaction() == defender.getFaction())
+			throw new IllegalArgumentException("Unit from the same faction");
 		this.attack(defender);
 		defender.defend(this);
 	}	
@@ -1690,17 +1573,23 @@ public class Unit extends GameObject{
 	private void finishDefend(double duration){
 		if (this.timeToFight > duration)
 			this.timeToFight -= duration;
-		else if ((! this.tryToDodge()) && (! this.block())){
+		else{
+			if ((! this.tryToDodge()) && (! this.block())){
 				int newHitPoints = (int) (this.getCurrentHitPoints()-
 						this.isDefendingTo.getStrength()/10.0+0.5);
 				if (newHitPoints < 0)
 					newHitPoints = 0;
 				this.setHitPoints(newHitPoints);
+				this.isDefendingTo.addExperiencePoints(20);
 				}
+			else{
+				this.addExperiencePoints(20);
+			}
 			this.setOrientation(this.lastOrientationBeforeInterruption);
 			this.setState(this.lastStateBeforeInterruption);
 			this.timeToFight = 0.0;
 			this.isDefendingTo = null;
+		}
 	}
 	
 	/**
@@ -1817,11 +1706,10 @@ public class Unit extends GameObject{
 	 * @throws 	IllegalStateException
 	 * 			The Unit may not be already Moving, Attacking, Defending, Working or
 	 * 			already resting, so it must be in idle state.
-	 * 			(!this.isState(State.IDLE))
 	 */
 	public void rest() throws IllegalStateException{
-		if (!this.isState(State.IDLE))
-			throw new IllegalStateException();
+		if (!this.isStateTransitionAllowed(State.RESTING))
+			throw new IllegalStateException("from " + this.getState().toString() + " to RESTING");
 		this.forceRest();
 	}
 	
@@ -2056,25 +1944,21 @@ public class Unit extends GameObject{
 	private final Faction faction;
 	
 	public Faction getFaction(){
-		return this.faction; //TODO, clone of niet?
+		return this.faction;
 	}
-	
 	
 	public boolean isAlive() {
-		// TODO uitwerken!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		return true;
+		return this.isAlive;
 	}
+	
+	private boolean isAlive = true;
 
 	public boolean isCarryingLog() {
-		return this.isCarryingLog;
+		return (this.carryingMaterial != null && this.carryingMaterial instanceof Log);
 	}
-	
-	private boolean isCarryingLog = false;
 
 	public boolean isCarryingBoulder() {
-		return this.isCarryingBoulder;
+		return (this.carryingMaterial != null && this.carryingMaterial instanceof Boulder);
 	}
-	
-	private boolean isCarryingBoulder = false;
 }
 	

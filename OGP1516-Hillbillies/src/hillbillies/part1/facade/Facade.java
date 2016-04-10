@@ -108,7 +108,7 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public int getWeight(Unit unit) throws ModelException{
-		return unit.getWeight();
+		return unit.getTotalWeight();
 	}
 
 	/**
