@@ -390,6 +390,10 @@ public class Vector {
 		}
 		return false;
 	}
+	
+	public Vector clear(){
+		return new Vector(this.getLength());
+	}
 
 	
 }

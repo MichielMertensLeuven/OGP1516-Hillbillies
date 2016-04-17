@@ -9,6 +9,7 @@
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/AnnotationsDoclets.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-4.5.3-complete.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

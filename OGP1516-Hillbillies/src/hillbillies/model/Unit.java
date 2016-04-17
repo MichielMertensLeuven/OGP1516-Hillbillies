@@ -1,3 +1,4 @@
+//TODO double dispatchS
 package hillbillies.model;
 
 import java.util.ArrayList;
@@ -1626,7 +1627,7 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 */
 	public Vector dodgePosition(){
 		boolean goodPosition = false;
-		Vector newPosition = new Vector(3);
+		Vector newPosition = this.getPosition().clear();
 		while (! goodPosition){
 			double[] jumpStep = new double[] {Math.random()*2-1.0, Math.random()*2-1.0, 0};
 			// x +- 0..1; y +- 0..1; same z plane
