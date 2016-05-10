@@ -1,0 +1,7 @@
+name: "goto_var"
+priority : 5
+activities : x:= here;
+			moveTo (10,10,10);
+			moveTo x;
+			x:= true;
+			if x then moveTo(9,9,9); fi

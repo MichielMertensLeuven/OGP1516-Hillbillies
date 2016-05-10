@@ -1,0 +1,9 @@
+name: "dig tunnel from (11, 10, 10) to (14, 10, 10)" priority : 1000
+activities:
+	moveTo (11, 10, 10);
+	if (false) then
+		moveTo (10, 10, 10);
+		else
+		moveTo (12, 10, 10);
+	fi
+	

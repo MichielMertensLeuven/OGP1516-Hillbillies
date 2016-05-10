@@ -1,0 +1,9 @@
+name: "follow_and_kill"
+priority : 500
+activities : x:= enemy;
+			while is_alive x
+			do 
+				follow x;
+				attack x;
+			done
+			print true;
