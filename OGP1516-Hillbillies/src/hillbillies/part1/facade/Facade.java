@@ -448,9 +448,9 @@ public class Facade implements IFacade {
 	public void fight(Unit attacker, Unit defender) throws ModelException{
 		try{attacker.fight(defender);
 		}
-		catch (IllegalStateException e){throw new ModelException("Unit already fighting");}
+		catch (IllegalStateException e){throw new ModelException(e.getMessage());}
 		catch (IllegalArgumentException e){
-			throw new ModelException("Unit too far away to fight");}
+			throw new ModelException(e.getMessage());}
 	}
 
 	/**
@@ -464,8 +464,8 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public boolean isAttacking(Unit unit) throws ModelException{
-		return unit.isAttacking();
-//		nakijken of enkel attacking
+		return unit.isAttacking() || unit.isDefending();
+//		TODO nakijken of enkel attacking
 	}
 
 	/* Resting */

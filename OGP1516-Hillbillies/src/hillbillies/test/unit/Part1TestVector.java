@@ -52,8 +52,8 @@ public class Part1TestVector {
 	public void testStepDirectionVector(){
 		Vector vector1 = new Vector(new double[] {1.5,2,8.8});
 		Vector vector2 = new Vector(new double[] {1.5,-1.2,9.3});
-		Vector realStep = new Vector(new double[] {0,-1,1});
-		assertTrue("Incorrect step", realStep.equals(vector1.stepDirection(vector2)));
+		int[] realStep = new int[]{0,-1,1};
+		assertArrayEquals("Incorrect step", realStep, vector1.stepDirection(vector2));
 	}
 	
 	@Test
@@ -124,7 +124,7 @@ public class Part1TestVector {
 	}
 	
 	@Test
-	public void testNeighboringCubes(){
+	public void testNeighboringCubesOnZ(){
 		Vector vector1 = new Vector(new double[] {1.4,2,8.8});
 		Vector vector2 = new Vector(new double[] {0.0,3.7,8.9});
 		assertTrue("These vectors are in neigboring cubes",
@@ -132,7 +132,7 @@ public class Part1TestVector {
 	}
 	
 	@Test
-	public void testNotNeighboringCubes(){
+	public void testNotNeighboringCubesOnZ(){
 		Vector vector1 = new Vector(new double[] {1.4,2.9,8.8});
 		Vector vector2 = new Vector(new double[] {0.0,4.1,8.9});
 		assertFalse("These vectors are not in neigboring cubes",
@@ -145,6 +145,22 @@ public class Part1TestVector {
 		Vector vector2 = new Vector(new double[] {0.0,2.4,9});
 		assertFalse("These vectors are not in neigboring cubes, because the z-level is different",
 				vector1.isDirectNeighboringCubeOnZLevel(vector2));
+	}
+	
+	@Test
+	public void testNeighboringCubes(){
+		Vector vector1 = new Vector(new double[] {1.4,2,8.8});
+		Vector vector2 = new Vector(new double[] {0.0,3.7,8.9});
+		assertTrue("These vectors are in neigboring cubes",
+				vector1.isNeighboringCube(vector2));
+	}
+	
+	@Test
+	public void testNotNeighboringCubes(){
+		Vector vector1 = new Vector(new double[] {1.4,2.9,8.8});
+		Vector vector2 = new Vector(new double[] {0.0,4.1,8.9});
+		assertFalse("These vectors are not in neigboring cubes",
+				vector1.isNeighboringCube(vector2));
 	}
 
 	@Test

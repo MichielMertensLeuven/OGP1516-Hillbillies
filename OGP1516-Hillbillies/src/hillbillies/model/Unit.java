@@ -43,7 +43,7 @@ import ogp.framework.util.*;
  */
 public class Unit extends GameObject{
 	/** 
-	 * Initialize a new Unit with given name, properties and
+	 * Initialize a new Unit with given name, properties, faction and
 	 * enable default behavior.
 	 * 
 	 * @param 	name
@@ -99,16 +99,99 @@ public class Unit extends GameObject{
 		this.setStaminaPoints((int) (0.8*this.getMaxStaminaPoints()));
 		this.defaultBehaviorEnabled = enableDefaultBehavior;
 		this.setState(State.IDLE);
-		if (!faction.addUnit(this))
+		if (!faction.addUnit(this)){
 			throw new IllegalArgumentException();
+		}
 		this.faction = faction;
 	}
 	
+	/**
+	 * Initialize a new Unit with given name, properties and
+	 * enable default behavior.
+	 * 
+	 * @effect  initialize a new Unit with a new faction
+	 * 			| this(name, initialPosition, weight, agility, strength, toughness,
+				|      enableDefaultBehavior, new Faction())
+	 */
 	public Unit(String name, int[] initialPosition, int weight, int agility,
 			int strength, int toughness, boolean enableDefaultBehavior){
 		this(name, initialPosition, weight, agility, strength, toughness,
 				enableDefaultBehavior, new Faction());
 	}
+	
+	/**
+	 * Corrects the value of an attribute to make sure
+	 * it satisfies the constraints for initialization.
+	 * The value needs to be between 25 and 100.
+	 *   
+	 * @param 	value
+	 * 			The value that needs to be checked and adapted.
+	 * @return	The corrected value.
+	 * 			| if (25 <= value <= 100) then result == value
+	 * 			| else if (value > 100) then result == 100
+	 * 			| else result == 25
+	 */
+	private static int correctInitialAttribute(int value){
+		return Helper.clip(value, 25, 100);
+	}
+	
+	// -----------
+	// ORIENTATION
+	// -----------
+	
+	/**
+	 * Return the orientation of this Unit in radians.
+	 */
+	@Basic @Raw
+	public double getOrientation() {
+		return this.orientation;
+	}
+	
+	/**
+	 * Check whether the given orientation is a valid orientation for
+	 * any Unit.
+	 *  
+	 * @param  orientation
+	 *         The orientation to check.
+	 * @return 
+	 *       | result == (orientation =< Math.PI) && (orientation > -Math.PI)
+	 */
+	private static boolean isValidOrientation(double orientation) {
+		return (Util.fuzzyLessThanOrEqualTo(orientation, Math.PI)) && 
+				(orientation > -Math.PI);
+	}
+	
+	/**
+	 * Set the orientation of this Unit to the given orientation.
+	 * 
+	 * @param  	orientation
+	 *         	The new orientation for this Unit in radians.
+	 * @post   	If the given orientation is a valid orientation for any Unit,
+	 *         	the orientation of this new Unit is equal to the given
+	 *         	orientation.
+	 *       	| if (isValidOrientation(orientation))
+	 *       	|   then new.getOrientation() == orientation
+	 * @post	If the given orientation is not valid for any Unit,
+	 * 			the orientation is set to the equivalent orientation in the range.
+	 * 			| if (isValidOrientation(orientation))
+	 *       	|   then new.getOrientation() == (orientation+Math.PI)%Math.PI*2-Math.PI
+	 */
+	@Raw
+	private void setOrientation(double orientation) {
+		if (!isValidOrientation(orientation))
+			orientation = (orientation+Math.PI)%Math.PI*2-Math.PI;
+		this.orientation = orientation;
+	}
+	
+	/**
+	 * Variable registering the orientation of this Unit.
+	 */
+	private double orientation;
+	
+	/**
+	 * Variable containing the default orientation.
+	 */
+	public static final double defaultOrientation = Math.PI/2; 
 	
 	/**
 	 * Calculates the orientation between this Vector and
@@ -131,50 +214,12 @@ public class Unit extends GameObject{
 			return Unit.defaultOrientation;
 		}
 	}
-
-	/**
-	 * Variable containing the default orientation.
-	 */
-	public static final double defaultOrientation = Math.PI/2; 
 	
-    /**
-     * Variable registering the state the Unit currently in.
-     */
-	private State state = State.IDLE;
+	// -----
+	// STATE
+	// -----
 	
 	/**
-	 * Variable registering the State the Unit was before it changed it.
-	 */
-    private State lastStateBeforeInterruption = State.IDLE;
-    
-    /**
-     * Variable registering the orientation the Unit had before it changed State.
-     */
-    private double lastOrientationBeforeInterruption = Unit.defaultOrientation; 
-
-	public boolean isStateTransitionAllowed(State targetState) {
-		boolean isStateTransitionRefused = false;
-		switch (targetState) {
-		case WORKING:
-			isStateTransitionRefused = this.isFalling() || this.isWorking() || this.isMoving() || this.isDefending() || this.isAttacking() || this.isRecovering();
-			break;
-		case ATTACKING:
-		case DEFENDING:
-			isStateTransitionRefused = this.isFalling() || this.isAttacking() || this.isDefending();
-			break;
-		case RESTING:
-			isStateTransitionRefused = !this.isState(State.IDLE);
-			break;
-		case FALLING:
-		case MOVING:
-		case IDLE:
-		default:
-			break;
-		}
-		return !isStateTransitionRefused;
-	}
-
-    /**
      * Change the State of this Unit to state.
      * 
      * @param 	state
@@ -182,13 +227,16 @@ public class Unit extends GameObject{
      * @post	The state has been changed.
      * 			| (new.getState() == state)
      * @post	The state of the Unit before switching its state is registered.
-     * 			| (new.lastStateBeforeInterruption = this.getState())
+     * 			| (new.lastStateBeforeInterruption == this.getState())
      * @post	The orientation of the Unit before switching its orientation is registered.
-     * 			| (new.lastOrientationBeforeInterruption = this.getOrientation())
+     * 			| (new.lastOrientationBeforeInterruption == this.getOrientation())
      */
     @Raw
     private void setState(State state) {
-		this.lastStateBeforeInterruption = this.getState();
+    	if (this.isDefending() || this.isAttacking() || this.isFalling())
+    		this.lastStateBeforeInterruption = State.IDLE;
+    	else
+    		this.lastStateBeforeInterruption = this.getState();
 		this.lastOrientationBeforeInterruption = this.getOrientation();
     	this.state = state;
     }
@@ -212,27 +260,67 @@ public class Unit extends GameObject{
     private State getState() {
     	return this.state;
     }
-    
 	
-	
-
+    /**
+     * Variable registering the state the Unit currently in.
+     */
+	private State state = State.IDLE;
 	
 	/**
-	 * Corrects the value of an attribute to make sure
-	 * it satisfies the constraints for initialization.
-	 * The value needs to be between 25 and 100.
-	 *   
-	 * @param 	value
-	 * 			The value that needs to be checked and adapted.
-	 * @return	The corrected value.
-	 * 			| if (25 <= value <= 100) then result == value
-	 * 			| else if (value > 100) then result == 100
-	 * 			| else result == 25
+	 * Variable registering the State the Unit was before it changed it.
 	 */
-	private static int correctInitialAttribute(int value){
-		return Helper.clip(value, 25, 100);
+    private State lastStateBeforeInterruption = State.IDLE;
+    
+    /**
+     * Variable registering the orientation the Unit had before it changed State.
+     */
+    private double lastOrientationBeforeInterruption = Unit.defaultOrientation; 
+    
+    /**
+     * Method to check if it is possible to change the current state to the targetState.
+     * 
+     * @param 	targetState
+     * 			The State to change to.
+     * @return	If you can cange the currentState to the targetState
+     * 			| if (targetState == FALLING || targetState == MOVING || targetState == IDLE)
+     * 			|		then result == true
+     * 			| else if (targetState == WORKING && !(this.isFalling() || this.isWorking() ||
+     * 			|							  		   this.isMoving() || this.isDefending() || 
+     * 			|								  	   this.isAttacking() || this.isRecovering())
+     * 			|		then result == true
+     * 			| else if ((targetState == ATTACKING || targetState == DEFENDING) && 
+     * 			|			!(this.isFalling() || this.isAttacking() || this.isDefending())
+     * 			|		then result == true
+     * 			| else if (targetState == RESTING && this.isState(State.IDLE))
+     * 			|		then result == true
+     * 			| else result == false
+     */
+	public boolean isStateTransitionAllowed(State targetState) {
+		boolean isStateTransitionRefused = false;
+		switch (targetState) {
+		case WORKING:
+			isStateTransitionRefused = this.isFalling() || this.isWorking() || this.isMoving() || this.isDefending() || this.isAttacking() || this.isRecovering();
+			break;
+		case ATTACKING:
+		case DEFENDING:
+			isStateTransitionRefused = this.isFalling() || this.isAttacking() || this.isDefending();
+			break;
+		case RESTING:
+			isStateTransitionRefused = !this.isState(State.IDLE);
+			break;
+		case FALLING:
+		case MOVING:
+		case IDLE:
+		default:
+			break;
+		}
+		return !isStateTransitionRefused;
 	}
-
+	
+	// ----
+	// NAME
+	// ----
+	
 	/**
 	 * Return the name of this Unit.
 	 */
@@ -291,6 +379,10 @@ public class Unit extends GameObject{
 	 * Variable registering the name of this Unit.
 	 */
 	private String name;
+	
+	// ----------
+	// ATTRIBUTES
+	// ----------
 	
 	/**
 	 * Return the weight of this Unit.
@@ -545,15 +637,7 @@ public class Unit extends GameObject{
 	public int getMaxHitPoints(){
 		return (int) Math.ceil(200*this.getWeight()*this.getToughness()/10000.0);
 	}
-
-	/**
-	 * Return the current hit points this Unit has.
-	 */
-	@Basic @Raw
-	public int getCurrentHitPoints(){
-		return this.hitPoints;
-	}
-
+	
 	/**
 	 * Set the number of hit points of this unit to hitPoints.
 	 * @param 	hitPoints
@@ -570,16 +654,15 @@ public class Unit extends GameObject{
 		if (hitPoints <= Unit.minHitPoints && this.getWorld() != null)
 			this.kill();
 	}
-	
-	//TODO finish
-	private void kill(){
-		this.isAlive = false;
-		// this.getFaction().removeUnit(this);
-		// should this be done? Unit must always belong to a faction?
-		if (this.getWorld() != null)
-			this.getWorld().removeGameObjectFromWorld(this);
+
+	/**
+	 * Return the current hit points this Unit has.
+	 */
+	@Basic @Raw
+	public int getCurrentHitPoints(){
+		return this.hitPoints;
 	}
-	
+
 	/**
 	 * A function to update the hit points, 
 	 * used when the max hit points is adapted.
@@ -613,8 +696,10 @@ public class Unit extends GameObject{
 	 * Variable registering the minimum number of hitPoints for all Units.
 	 */
 	private final static int minHitPoints = 0;
-
 	
+	// --------------
+	// ADVANCING TIME 	
+	// --------------
 	
 	/**
 	 * Return if dt is a legal duration for all Units.
@@ -633,6 +718,14 @@ public class Unit extends GameObject{
 	 * 
 	 * @param 	duration
 	 * 			Difference in time in game play with last advanceTime.
+	 * @effect	If the Unit is not already falling and he is standing on a position
+	 * 			where he should fall, the unit starts falling.
+	 * 			| if (!this.isFalling() && this.isFallingPosition(this.getPosition()) &&
+	 *			|		!this.getPosition().isOnEdge())
+	 *			|	this.startFalling()
+	 * @effect	If the Unit is falling, he advances the falling maneuver.
+	 * 			| if (this.isFalling())
+	 * 			| 	this.finishFalling(duration)
 	 * @effect	If the Unit is moving, his current position has been updated.
 	 * 			| if this.isState(State.MOVING)
 	 * 			| 	this.finishMoving(duration)
@@ -708,17 +801,36 @@ public class Unit extends GameObject{
 	}
 	
 	/**
-	 * Function to let this Unit proceed his work with a given duration.
+	 * Variable registering the time since the last rest.
+	 */
+	private double timeToStartResting = restInterval;
+	
+	/**
+	 * The amount of time in which a Unit is forced to rest once.
+	 */
+    private static final double restInterval = 180.0; // seconds, so every 3 minutes
+	
+	// -------
+	// FALLING
+	// -------
+
+	/**
+	 * Function to let this Unit proceed his fall with a given duration.
 	 * 
 	 * @param 	duration
-	 * 			The amount of gaming time a Unit has worked since the last update.
-	 * @post	The Unit's time left to finish is work is updated.
-	 * 			| (new.timeToWork == this.timeToWork - duration)
-	 * @post	If the Unit is ready working, it is set back to the idle State.
-	 * 			| if (this.timeToWork - duration < 0)
-	 * 			| 		(new.isState(State.IDLE))
-	 * @post	If the Unit has finished working, timeToWork is set to 0.
-	 * 			| (new.timeToWork == 0)
+	 * 			The amount of gaming time a Unit fell since the last update.
+	 * @effect	The unit always advancesFalling
+	 * 			| this.advanceFalling(duration)
+	 * @post	If the Unit has fell long enough, per level he fell, 10 hitpoints are subtracted.
+	 * 			| if (!this.advanceFalling(duration))
+	 * 			| 	(new.getHitPoints == Helper.clip(this.getCurrentHitPoints() - 10*this.levelsToFall,
+	 *			|							Unit.minHitPoints,this.getMaxHitPoints())
+	 * @post	If the Unit has fell long enough, his state is set back to IDLE. 
+	 * 			| if (!this.advanceFalling(duration))
+	 * 			|		new.isState(IDLE)
+	 * @post	If the Unit has fell long enough, levelsToFall is set back to 0. 
+	 * 			| if (!this.advanceFalling(duration))
+	 * 			|		new.levelsToFall == 0
 	 */
 	private void finishFalling(double duration){
 		if (!this.advanceFalling(duration)){
@@ -730,6 +842,17 @@ public class Unit extends GameObject{
 		}
 	}
 	
+	/**
+	 * Function to let this Unit start falling.
+	 * 
+	 * @post	The state of the unit is set to falling
+	 * 			| new.isFalling()
+	 * @post	The orientation is set to the defaultOrientation
+	 * 			| new.getOrientation == defaultOrientation
+	 * @post	The number of levels to fall is remembered to 
+	 * 			subtract staminapoints at the end of the fall.
+	 * 			| new.levelsToFall == (int) (this.getDistanceToFall()) 			
+	 */
 	@Override
 	protected void startFalling(){
 		super.startFalling();
@@ -737,7 +860,15 @@ public class Unit extends GameObject{
 		this.setOrientation(Unit.defaultOrientation);
 		this.levelsToFall = (int) this.getDistanceToFall();
 	}
-		
+	
+	/**
+	 * Returns true if the vector is a position, where a unit should fall.
+	 * 
+	 * @param	currentPosition
+	 * 			The position to inspect
+	 * @return	if the cube of the currentPosition is not a standableCube
+	 * 			| !this.isStandableCube(currentPosition.getCubeCoordinates())
+	 */
 	@Override
 	public boolean isFallingPosition(Vector currentPosition)
 			throws NullPointerException, IllegalArgumentException{
@@ -746,71 +877,41 @@ public class Unit extends GameObject{
 		return (!this.isStandableCube(currentPosition.getCubeCoordinates()));
 	}
 	
+	/**
+	 * Returns if the cube in this world is a standable for a Unit.
+	 * 
+	 * @param 	cube
+	 * 			the cube to check
+	 * @return	whether the cube is passable and has a solid neighbour.
+	 * 			| result == this.getWorld().isPassable(cube[0],cube[1],cube[2]) && 
+				|			this.getWorld().hasSolidNeighbour(cube))
+	 * @throws IllegalArgumentException
+	 */
+	private boolean isStandableCube(int[] cube) throws IllegalArgumentException{
+		int x = cube[0];
+		int y = cube[1];
+		int z = cube[2];
+		if (!this.getWorld().isValidCube(x, y, z))
+			throw new IllegalArgumentException();
+		return (this.getWorld().isPassable(x,y,z) && 
+				this.getWorld().hasSolidNeighbour(cube));
+	}
+	
+	/**
+	 * Returns whether this Unit is currently falling.
+	 * 
+	 * @return  Whether the Unit is in falling State
+	 * 			this.isState(State.FALLING)
+	 */
 	@Override
 	public boolean isFalling(){
 		return this.isState(State.FALLING);
 	}
 	
+	/**
+	 * Variable registering the number of levels this Unit has fell/ is falling.
+	 */
 	private int levelsToFall = 0;
-	
-	/**
-	 * Variable registering the time since the last rest.
-	 */
-	private double timeToStartResting = restInterval;
-	
-	/**
-	 * The amount of time in which a Unit is forced to rest once.
-	 */
-    private static final double restInterval = 180.0; // seconds, so every 3 minutes
- 		
-	/**
-	 * Return the orientation of this Unit in radians.
-	 */
-	@Basic @Raw
-	public double getOrientation() {
-		return this.orientation;
-	}
-	
-	/**
-	 * Check whether the given orientation is a valid orientation for
-	 * any Unit.
-	 *  
-	 * @param  orientation
-	 *         The orientation to check.
-	 * @return 
-	 *       | result == (orientation =< Math.PI) && (orientation > -Math.PI)
-	 */
-	private static boolean isValidOrientation(double orientation) {
-		return (Util.fuzzyLessThanOrEqualTo(orientation, Math.PI)) && 
-				(orientation > -Math.PI);
-	}
-	
-	/**
-	 * Set the orientation of this Unit to the given orientation.
-	 * 
-	 * @param  	orientation
-	 *         	The new orientation for this Unit in radians.
-	 * @post   	If the given orientation is a valid orientation for any Unit,
-	 *         	the orientation of this new Unit is equal to the given
-	 *         	orientation.
-	 *       	| if (isValidOrientation(orientation))
-	 *       	|   then new.getOrientation() == orientation
-	 * @post	If the given orientation is not valid for any Unit,
-	 * 			the orientation is set to the equivalent orientation in the range.
-	 * 			| if (isValidOrientation(orientation))
-	 *       	|   then new.getOrientation() == (orientation+Math.PI)%Math.PI*2-Math.PI
-	 */
-	@Raw
-	private void setOrientation(double orientation) {
-		if (!isValidOrientation(orientation))
-			orientation = (orientation+Math.PI)%Math.PI*2-Math.PI;
-		this.orientation = orientation;
-	}
-	
-	/**
-	 * Variable registering the orientation of this Unit.
-	 */
-	private double orientation;
 	
 	// ------------
 	// MOVING STATE
@@ -964,12 +1065,40 @@ public class Unit extends GameObject{
 		if (this.timeToArrive > duration){
 			this.timeToArrive -= duration;
 			Vector newVector = this.getPosition().addVector(this.velocity.multiply(duration));
-		this.setPosition(newVector);
+			try{
+				this.setPosition(newVector);
+			} catch (IllegalArgumentException e){
+				if (!e.getMessage().equals("Not passable position"))
+					throw e;}
+			if (this.defaultBehaviorEnabled && !this.isSprinting() && 
+					!this.hasTriedSprintingDuringThisMove &&
+					(this.getCurrentStaminaPoints()>Unit.minStaminaPoints)) {
+				if (Math.random() > 0.25)
+				{
+					this.startSprinting();
+				}
+				this.hasTriedSprintingDuringThisMove = true;
+			}		
 		}
 		else{
 			this.addExperiencePoints(1);
+			boolean shouldContinue = true;
 			if (this.getPosition().isTheSameCube(this.targetPosition)){
 				this.setPosition(this.targetPosition);
+				shouldContinue = false;
+			}
+			else {
+				try{
+					this.moveTo(this.targetPosition.getCubeCoordinates());
+				} catch (IllegalArgumentException e){
+					if (!e.getMessage().equals("Position not reachable"))
+						throw e;
+					else{
+						shouldContinue = false;
+					}
+				}
+			}
+			if (!shouldContinue){
 				if (this.isSprinting())
 					this.stopSprinting();
 				this.setState(State.IDLE);
@@ -977,19 +1106,8 @@ public class Unit extends GameObject{
 				this.setOrientation(Unit.defaultOrientation);
 				this.velocity = new Vector(3);
 			}
-			else {
-				this.moveTo(this.targetPosition.getCubeCoordinates());
-			}
+			
 		}
-		if (this.defaultBehaviorEnabled && !this.isSprinting() && 
-				!this.hasTriedSprintingDuringThisMove &&
-				(this.getCurrentStaminaPoints()<=minStaminaPoints)) {
-			if (Math.random() > 0.25)
-			{
-				this.startSprinting();
-			}
-			this.hasTriedSprintingDuringThisMove = true;
-		}		
 		if (this.isSprinting()){
 			this.timeSprinting += duration;
 			int nbOfTicks = (int) (timeSprinting/0.1);
@@ -1053,7 +1171,7 @@ public class Unit extends GameObject{
 		this.setShortTermTarget(Vector.getCubeCenter(this.getNextStepPath(Helper.converter(this.getPosition().getCubeCoordinates()))));
 	}
 	
-	public int[] getNextStepPath(Integer[] current) throws IllegalStateException{
+	private int[] getNextStepPath(Integer[] current) throws IllegalStateException{
 		if (!this.pathfinderContains(current))
 			throw new IllegalStateException();
 		Integer[] currentBest = null;
@@ -1069,7 +1187,7 @@ public class Unit extends GameObject{
 		return Helper.converter(currentBest);
 	}
 	
-private Map<String, Integer> pathFinder = new HashMap<>();
+	private Map<String, Integer> pathFinder = new HashMap<>();
 	
 	private Integer getPathfinderValue(Integer[] cube){
 		return this.pathFinder.get(Arrays.deepToString(cube));
@@ -1105,19 +1223,6 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		}
 		return nextSteps;
 	}
-	
-	private boolean isStandableCube(int[] cube) throws IllegalArgumentException{
-		int x = cube[0];
-		int y = cube[1];
-		int z = cube[2];
-		if (!this.getWorld().isValidCube(x, y, z))
-			throw new IllegalArgumentException();
-		return (this.getWorld().isPassable(x,y,z) && 
-				this.getWorld().hasSolidNeighbour(cube));
-	}
-	
-	
-	
 	
 	private boolean setPath(Integer[] target, Integer[] current){
 		this.clearPathfinder();
@@ -1170,7 +1275,7 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	/**
 	 * Returns whether this Unit is currently in moving State.
 	 * 
-	 * @return  Wheter the Unit is in moving State
+	 * @return  Whether the Unit is in moving State
 	 * 			this.isState(State.MOVING)
 	 */
 	public boolean isMoving(){
@@ -1196,8 +1301,8 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 */
 	public void startSprinting() throws IllegalStateException{
 		if ((!this.isMoving()) || (this.isSprinting()) ||
-				(this.getCurrentStaminaPoints()<=minStaminaPoints))
-			throw new IllegalStateException();
+				(this.getCurrentStaminaPoints()<=Unit.minStaminaPoints)){
+			throw new IllegalStateException();}
 		this.isSprinting = true;
 		this.timeToArrive /= 2.0;
 		this.velocity = this.velocity.multiply(2.0);
@@ -1235,6 +1340,29 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	// -------------
 	
 	/**
+	 * Function to let this Unit proceed his work with a given duration.
+	 * 
+	 * @param 	duration
+	 * 			The amount of gaming time a Unit has worked since the last update.
+	 * @post	The Unit's time left to finish is work is updated.
+	 * 			| (new.timeToWork == this.timeToWork - duration)
+	 * @post	If the Unit is ready working, it is set back to the idle State.
+	 * 			| if (this.timeToWork - duration < 0)
+	 * 			| 		(new.isState(State.IDLE))
+	 * @post	If the Unit has finished working, timeToWork is set to 0.
+	 * 			| (new.timeToWork == 0)
+	 */
+	private void finishWork(double duration){
+		if (this.timeToWork > duration)
+			this.timeToWork -= duration;
+		else{
+			this.finishWorkAt(this.workingSpace[0], this.workingSpace[1], this.workingSpace[2]);
+			this.timeToWork = 0;
+			this.setState(State.IDLE);
+		}
+	}
+	
+	/**
 	 * Returns whether this Unit is currently working.
 	 * 
 	 * @return	Whether this Unit in working State.
@@ -1269,41 +1397,88 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.timeToWork = (500.0/this.getStrength());
 	}
 	
+	/**
+	 * Function to let the unit work at a random valid cube.
+	 * 
+	 * @effect	workAt a valid random cube.
+	 * 			| this.workAt(randomPos[0], randomPos[1], randomPos[2])
+	 * 			| where randomPos in this.getSurroundingCubes(this.getPosition())
+	 * @throws NullPointerException
+	 */
 	public void work() throws NullPointerException{
 		if (this.getWorld() == null)
 			throw new NullPointerException();
-		List<Integer[]> possibleWorkingPlaces = this.getSurroundingCubes(this.getPosition());
+		List<Integer[]> possibleWorkingPlaces = this.getWorld().getSurroundingCubes(this.getPosition());
 		int nbPossiblePlaces = possibleWorkingPlaces.size();
 		int[] randomPos = Helper.converter(possibleWorkingPlaces.get(
 				(int) (Math.random()*nbPossiblePlaces)));
 		this.workAt(randomPos[0], randomPos[1], randomPos[2]);
 	}
 	
+	/**
+	 * Function to let the unit work at the cube with coordinates x,y,z.
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @post	the workingSpace is set to the cube with coordinates x,y,z
+	 * 			| new.workingSpace == int[]{x,y,z}
+	 * @effect	this unit starts working
+	 * 			| this.startWorking()
+	 * 
+	 * @throws 	IllegalStateException
+	 * 			If the current state can not be replaced with the workingState.
+	 * 			| !this.isStateTransitionAllowed(State.WORKING)
+	 * @throws 	IllegalArgumentException
+	 * 			If the selected cube is not a valid neigbouring cube.
+	 * 			| !this.containsCube(
+	 *			|		this.getSurroundingCubes(this.getPosition()), new int[] {x,y,z}))
+	 */
 	public void workAt(int x, int y, int z) throws IllegalStateException, IllegalArgumentException{
-		if (!this.containsCube(
-				this.getSurroundingCubes(this.getPosition()), new int[] {x,y,z}))
+		if (!Helper.containsCube(
+				this.getWorld().getSurroundingCubes(this.getPosition()), new int[] {x,y,z}))
 			throw new IllegalArgumentException("Can not work on selected cube");
 		this.workingSpace = new int[]{x,y,z};
 		this.startWorking();
 	}
 	
-	private List<Integer[]> getSurroundingCubes(Vector position){
-		List<Integer[]> surroundingCubes = this.getWorld().getValidNeigbouringCubes(
-				Helper.converter(this.getPosition().getCubeCoordinates()));
-		surroundingCubes.add(Helper.converter(this.getPosition().getCubeCoordinates()));
-		return surroundingCubes;
-	}
-	
-	private boolean containsCube(List<Integer[]> list, int[] cubeToInspect){
-		for (Integer[] cube: list){
-			if (Arrays.equals(Helper.converter(cube),cubeToInspect))
-				return true;
-		}
-		return false;
-	}
-	
+	/**
+	 * Variable registering the cube where the unit is working.
+	 */
 	private int[] workingSpace;
 	
+	/**
+	 * Finishing workAt the cube with coordinates x,y,z
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @effect	uses sort of switch case scenario to choose how to finish the workAt
+	 * 			| if (this.canDropMaterial(x, y, z))
+	 *			|	this.dropMaterial(x,y,z);
+	 *			| else if (this.getWorld().isValidWorkshop(x, y, z))
+	 *			| 	this.workshop(x,y,z);
+	 *			| else if (this.getWorld().cubeHasLog(x,y,z))
+	 *			|	this.pickUpLog(x,y,z);
+	 *			| else if (this.getWorld().cubeHasBoulder(x,y,z))
+	 *			|	this.pickUpBoulder(x,y,z);
+	 *			| else if (this.getWorld().isSolid(x,y,z))
+	 *			|	this.getWorld().collapseCube(x,y,z);
+	 * @post	this unit gains 10 experience points for a finished work task
+	 * 			| new.getExperiencePoints() == this.getExperiencePoints() + 10
+	 * 
+	 * @throws	IllegalStateException
+	 * 			The unit should be currently working.
+	 * 			| !this.isWorking()
+	 */
 	private void finishWorkAt(int x, int y, int z) throws IllegalStateException{
 		if (!this.isWorking())
 			throw new IllegalStateException();
@@ -1320,11 +1495,46 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.addExperiencePoints(10);
 	}
 	
+	/**
+	 * Returns if it is possible to let this unit drop material at the selected cube
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @return	the selected cube should be passable and the unit should be carrying
+	 * 			a log or a boulder.
+	 * 			| result == this.getWorld().isPassable(x, y, z) && this.isCarryingMaterial()
+	 */
 	public boolean canDropMaterial(int x,int y, int z){
-		return this.getWorld().isPassable(x, y, z) &&
-				(this.isCarryingLog() || this.isCarryingBoulder());
+		return (this.getWorld().isPassable(x, y, z) && this.isCarryingMaterial());
 	}
-	
+
+	/**
+	 * Method to operate a workshop on the selected workshop cube
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @effect	A boulder and log that were positioned on the selected workshop cube
+	 * 			were removed.
+	 * 			| this.getWorld().removeGameObjectFromWorld(this.getWorld().getLogOn(x, y, z))
+	 * 			| this.getWorld().removeGameObjectFromWorld(this.getWorld().getBoulderOn(x, y, z))
+	 * @effect	The Weight and toughness of this unit are 10% better.
+	 * 			| this.setWeight((int) (this.getWeight()*1.1));
+	 *			| this.setToughness((int) (this.getToughness()*1.1));
+	 * 
+	 * @throws 	IllegalArgumentException
+	 * 			the workshop place should be valid
+	 * 			| !this.getWorld().isValidWorkshop(x, y, z)
+	 */
 	private void workshop(int x, int y, int z) throws IllegalArgumentException{
 		if (!this.getWorld().isValidWorkshop(x, y, z))
 			throw new IllegalArgumentException();
@@ -1337,6 +1547,26 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.setToughness((int) (this.getToughness()*1.1));
 	}
 	
+	/**
+	 * A boulder is picked up from the selected position.
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @post	the unit carries a boulder
+	 * 			| new.carryingMaterial != null && 
+	 * 			|		new.carryingMaterial instanceof Boulder
+	 * @post	the picked up boulder is removed from the game world
+	 * 			| !this.getWorld().getBoulders().contains(new.carryingMaterial)
+	 * 
+	 * @throws 	IllegalArgumentException
+	 * 			the selected cube does not contain any Boulders
+	 * 			!this.getWorld().cubeHasBoulder(x, y, z)
+	 */
 	private void pickUpBoulder(int x, int y, int z) throws IllegalArgumentException{
 		if (!this.getWorld().cubeHasBoulder(x, y, z))
 			throw new IllegalArgumentException();
@@ -1344,7 +1574,27 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.carryingMaterial = boulder;
 		this.getWorld().removeGameObjectFromWorld(boulder);
 	}
-	
+
+	/**
+	 * A log is picked up from the selected position.
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @post	the unit carries a log
+	 * 			| new.carryingMaterial != null && 
+	 * 			|		new.carryingMaterial instanceof Log
+	 * @post	the picked up log is removed from the game world
+	 * 			| !this.getWorld().getLogs().contains(new.carryingMaterial)
+	 * 
+	 * @throws 	IllegalArgumentException
+	 * 			the selected cube does not contain any Logs
+	 * 			!this.getWorld().cubeHasLog(x, y, z)
+	 */
 	private void pickUpLog(int x, int y, int z) throws IllegalArgumentException{
 		if (!this.getWorld().cubeHasLog(x, y, z))
 			throw new IllegalArgumentException();
@@ -1353,6 +1603,28 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.getWorld().removeGameObjectFromWorld(log);
 	}
 	
+	/**
+	 * Method to drop the material the unit was carrying on the selected cube.
+	 * 
+	 * @param 	x
+	 * 			x-coordinate
+	 * @param 	y
+	 * 			y-coordinate
+	 * @param 	z
+	 * 			z-coordinate
+	 * 
+	 * @post	the unit is not carrying any Materials anymore.
+	 * 			| new.carryingMaterial == null
+	 * @post	the position of the dropped material is now at the center of the
+	 * 			selected cube
+	 * 			| this.carryingMaterial.getPosition ==  Vector.getCubeCenter(new int[]{x,y,z})			
+	 * @throws 	IllegalStateException
+	 * 			the unit cannot drop material (here)
+	 * 			| !this.canDropMaterial(x, y, z)
+	 * @throws  IllegalArgumentException
+	 * 			the selected position is not a good position to drop a material
+	 * 			| !this.getWorld().addGameObjectToWorld(this.carryingMaterial)
+	 */
 	private void dropMaterial(int x, int y, int z) throws IllegalStateException, IllegalArgumentException{
 		if (!this.canDropMaterial(x, y, z))
 			throw new IllegalStateException();
@@ -1363,36 +1635,56 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 		this.carryingMaterial = null;
 	}
 	
+	/**
+	 * Method to get the weight of the material the unit is currently carrying
+	 * 
+	 * @return	if the unit is not carrying any material, return 0
+	 * 			| this.carryingMaterial == null
+	 * 			| 	then result == 0
+	 * @return 	if the unit is carrying some material now, return the weight of it
+	 * 			| this.carryingMaterial != null
+	 * 			| 	then result == this.carryingMaterial.getWeight()
+	 */
 	private int getCarryingWeight(){
 		if (this.carryingMaterial == null)
 			return 0;
 		return this.carryingMaterial.getWeight();
 	}
 	
+	/**
+	 * Variable registering the material this unit is carrying, null if none.
+	 */
 	private Material carryingMaterial = null;
 	
+	/**
+	 * Returns true if this Unit is carrying a log.
+	 * 
+	 * @return	whether this unit is carrying a log.
+	 * 			| this.carryingMaterial != null && this.carryingMaterial instanceof Log
+	 */
+
+	public boolean isCarryingLog() {
+		return (this.isCarryingMaterial() && this.carryingMaterial instanceof Log);
+	}
 	
 	/**
-	 * Function to let this Unit proceed his work with a given duration.
+	 * Returns true if this Unit is carrying a boulder.
 	 * 
-	 * @param 	duration
-	 * 			The amount of gaming time a Unit has worked since the last update.
-	 * @post	The Unit's time left to finish is work is updated.
-	 * 			| (new.timeToWork == this.timeToWork - duration)
-	 * @post	If the Unit is ready working, it is set back to the idle State.
-	 * 			| if (this.timeToWork - duration < 0)
-	 * 			| 		(new.isState(State.IDLE))
-	 * @post	If the Unit has finished working, timeToWork is set to 0.
-	 * 			| (new.timeToWork == 0)
+	 * @return	whether this unit is carrying a boulder.
+	 * 			| this.isCarryingMaterial && this.carryingMaterial instanceof Boulder
 	 */
-	private void finishWork(double duration){
-		if (this.timeToWork > duration)
-			this.timeToWork -= duration;
-		else{
-			this.finishWorkAt(this.workingSpace[0], this.workingSpace[1], this.workingSpace[2]);
-			this.timeToWork = 0;
-			this.setState(State.IDLE);
-		}
+	public boolean isCarryingBoulder() {
+		return (this.isCarryingMaterial() && this.carryingMaterial instanceof Boulder);
+	}
+	
+	/**
+	 * Returns true if this Unit is carrying a material.
+	 * 
+	 * @return	whether this unit is carrying a material.
+	 * 			| this.carryingMaterial != null
+	 */
+	public boolean isCarryingMaterial() {
+		return (this.carryingMaterial != null);
 	}
 	
 	// --------------
@@ -1454,16 +1746,42 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 */
 	public void fight(Unit defender) throws IllegalStateException,
 	IllegalArgumentException{
-		if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
-				(defender == this))
-			throw new IllegalStateException("from " + this.getState().toString() + " to FIGHTING");
-		if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
+		if (!this.canFightWith(defender)){
+			if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
+					(defender == this))
+				throw new IllegalStateException("from " + this.getState().toString() + " to FIGHTING");
+			if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
 				throw new IllegalArgumentException("Invalid position to fight");
-		if (this.getFaction() == defender.getFaction())
-			throw new IllegalArgumentException("Unit from the same faction");
+			if (this.getFaction() == defender.getFaction())
+				throw new IllegalArgumentException("Unit from the same faction");
+		} //TODO
 		this.attack(defender);
 		defender.defend(this);
-	}	
+	}
+	
+	public boolean canFightWith(Unit defender){
+		boolean result = true;
+		if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
+				(defender == this))
+			result = false; // wrong state
+		if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
+			result = false; // Invalid position to fight
+		if (this.getFaction() == defender.getFaction())
+			result = false; //Unit from the same faction
+		return result;
+	}
+	
+	/**
+	 * Method to check if this unit is in the same faction as the other.
+	 * 
+	 * @param 	other
+	 * 			The other unit to check
+	 * @return	Whether this unit has the same faction as other unit.
+	 * 			| result == (this.getFaction() == other.getFaction())
+	 */
+	public boolean hasSameFaction(Unit other){
+		return this.getFaction() == other.getFaction();
+	}
 	
 	/**
 	 * Start a fight between this Unit and defender.
@@ -1728,10 +2046,11 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 * 			| (new.getOrientation == Position.defaultOrientation)
 	 */
 	private void forceRest() throws IllegalStateException{
-		this.setState(State.RESTING);
-		this.isRecovering = true;
-		this.elapsedRestingTime = 0;
-		this.setOrientation(Unit.defaultOrientation);
+		if (!this.isAttacking() || !this.isDefending() || !this.isFalling())
+			this.setState(State.RESTING);
+			this.isRecovering = true;
+			this.elapsedRestingTime = 0;
+			this.setOrientation(Unit.defaultOrientation);
 	}
 	
 	/**
@@ -1869,20 +2188,127 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 * It may choose to work, rest or move to a random location in the gameWorld.
 	 */
 	private void defaultBehavior(){
-		double rand = Math.random();
-		if (rand<0.5)
-			this.work();
-		else if (rand<0.75)
-			this.rest();
-		else this.moveTo(this.getWorld().getRandomCube());
+		if (this.isExecutingTask()){
+			this.getTask().advanceTime();
+			if (this.getTask().isFinished())
+				this.finishTask();
+		} 
+		else {
+			Task task = this.getFaction().getScheduler().getHighestPriorityTask();
+			if (task != null){
+				this.executeTask(task);
+			}
+			else {
+				double rand = Math.random();
+				if (rand < 0.25 && this.getAttackableUnit() != null)
+					this.fight(this.getAttackableUnit());
+				else if (rand<0.5)
+					this.work();
+				else if (rand<0.75)
+					this.rest();
+				else
+					try{
+					this.moveTo(this.getWorld().getRandomCube());
+					} catch (IllegalArgumentException e) {
+						if (!e.getMessage().equals("Position not reachable"))
+							throw e;
+				}
+			}
+		}
 	}
 	
+	/**
+	 * Returns a Unit this unit can attack, if no such Unit exists,
+	 * returns null.
+	 * 
+	 * @return	A unit this unit can attack, otherwise null.
+	 * 			| this.canFightWith(result)
+	 */
+	private Unit getAttackableUnit(){
+		for (Unit other: this.getWorld().getUnits()){
+			if (this.canFightWith(other))
+				return other;
+		}
+		return null;
+	}
+	
+	/** TO BE ADDED TO CLASS HEADING
+	 * @invar  The task of each Unit must be a valid task for any
+	 *         Unit.
+	 *       | isValidTask(getTask())
+	 */
+	//TODO
+	public void executeTask(Task task){
+		this.setTask(task);
+		task.execute(this);
+	}
+	
+	public void finishTask(){
+		this.getFaction().getScheduler().removeTask(this.task);
+		this.task = null;
+	}
+
+	/**
+	 * Return the task of this Unit.
+	 */
+	@Basic @Raw
+	public Task getTask() {
+		return this.task;
+	}
+	
+	/**
+	 * Check whether the given task is a valid task for
+	 * any Unit.
+	 *  
+	 * @param  task
+	 *         The task to check.
+	 * @return 
+	 *       | result == 
+	*/
+	public static boolean isValidTask(Task task) {
+		return true; //TODO checken
+	}
+	
+	/**
+	 * Set the task of this Unit to the given task.
+	 * 
+	 * @param  task
+	 *         The new task for this Unit.
+	 * @post   The task of this new Unit is equal to
+	 *         the given task.
+	 *       | new.getTask() == task
+	 * @throws IllegalArgumentException
+	 *         The given task is not a valid task for any
+	 *         Unit.
+	 *       | ! isValidTask(getTask())
+	 */
+	@Raw
+	public void setTask(Task task) 
+			throws IllegalArgumentException {
+		if (! isValidTask(task))
+			throw new IllegalArgumentException();
+		this.task = task;
+	}
+	
+	/**
+	 * Variable registering the task of this Unit.
+	 */
+	private Task task = null;
+	
+	public boolean isExecutingTask(){
+		return task != null;
+	}
+	
+	//TODO
 	/** TO BE ADDED TO CLASS HEADING
 	 * @invar  The experiencePoints of each Unit must be a valid experiencePoints for any
 	 *         Unit.
 	 *       | isValidExperiencePoints(getExperiencePoints())
 	 */
-
+	
+	// -----------------
+	// EXPERIENCE POINTS
+	// -----------------
 	
 	/**
 	 * Return the experiencePoints of this Unit.
@@ -1899,24 +2325,25 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 * @param  experiencePoints
 	 *         The experiencePoints to check.
 	 * @return 
-	 *       | result == 
+	 *       | result == experiencePoints>=0
 	*/
-	public static boolean isValidExtraExperiencePoints(int ExpPoints) {
-		return (ExpPoints>=0);
+	public static boolean isValidExtraExperiencePoints(int experiencePoints) {
+		return (experiencePoints>=0);
 	}
 	
 	/**
-	 * Set the experiencePoints of this Unit to the given experiencePoints.
+	 * Add experiencePoints to the experiencePoints of this Unit.
 	 * 
 	 * @param  ExpPoints
 	 *         The new experiencePoints for this Unit.
 	 * @post   The experiencePoints of this new Unit is equal to
 	 *         the given experiencePoints.
-	 *       | new.getExperiencePoints() == ExpPoints
+	 *         | new.getExperiencePoints() == ExpPoints
+	 * @post   per 10 experiencePoints, this unit gains at random a strength, toughness or agilityPoint.
 	 * @throws IllegalArgumentException
 	 *         The given experiencePoints is not a valid experiencePoints for any
 	 *         Unit.
-	 *       | ! isValidExperiencePoints(getExperiencePoints())
+	 *         | ! isValidExperiencePoints(getExperiencePoints())
 	 */
 	public void addExperiencePoints(int ExpPoints) 
 			throws IllegalArgumentException {
@@ -1940,26 +2367,72 @@ private Map<String, Integer> pathFinder = new HashMap<>();
 	 * Variable registering the experiencePoints of this Unit.
 	 */
 	private int expiencePoints = 0;
+	
+	/**
+	 * Variable registering the number of experiencepoints
+	 * a Unit has to gain, to get a reward.
+	 */
 	private static final int nbExpPointsForReward = 10;
 	
+	// -------
+	// FACTION
+	// -------
+	
+	/**
+	 * Variable registering the faction of this Unit.
+	 */
 	private final Faction faction;
 	
+	/**
+	 * Returns the faction of this unit
+	 * 
+	 * @return	the faction of this unit
+	 * 			| this.faction
+	 */
 	public Faction getFaction(){
 		return this.faction;
 	}
 	
+	// -----
+	// ALIVE
+	// -----
+
+	/**
+	 * Returns whether this unit is alive or dead.
+	 * 
+	 * @return	true if the unit is alive, false if dead
+	 * 			| this.isAlive
+	 */
 	public boolean isAlive() {
 		return this.isAlive;
 	}
 	
+	/**
+	 * variable registering the living state of the unit.
+	 */
 	private boolean isAlive = true;
-
-	public boolean isCarryingLog() {
-		return (this.carryingMaterial != null && this.carryingMaterial instanceof Log);
-	}
-
-	public boolean isCarryingBoulder() {
-		return (this.carryingMaterial != null && this.carryingMaterial instanceof Boulder);
+	
+	/**
+	 * Method to eliminate this Unit
+	 * 
+	 * @post	The unit is dead.
+	 * 			| !this.isAlive()
+	 * @effect	If the unit was carrying some material,
+	 * 			it is dropped on the current position.
+	 * 			| this.dropMaterial((this.getPosition())
+	 * @effect	The unit is removed from the gameWorld.
+	 * 			| this.getWorld().removeGameObjectFromWorld(this)
+	 * @effect	The unit is removed form the faction.
+	 * 			| this.getFaction().removeUnit(this)
+	 */
+	private void kill(){
+		if (this.isCarryingMaterial())
+			this.dropMaterial(this.getPosition().getCubeCoordinates()[0],
+					this.getPosition().getCubeCoordinates()[1], this.getPosition().getCubeCoordinates()[2]);
+		this.isAlive = false;
+		this.getFaction().removeUnit(this);
+		if (this.getWorld() != null)
+			this.getWorld().removeGameObjectFromWorld(this);
 	}
 }
 	

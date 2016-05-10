@@ -116,14 +116,14 @@ public class Vector {
 			return -1;
 	}
 	
-	public Vector stepDirection(Vector targetVector) throws IllegalArgumentException{
+	public int[] stepDirection(Vector targetVector) throws IllegalArgumentException{
 		if (!this.isCompatible(targetVector))
 			throw new IllegalArgumentException();
-		double[] newVector = new double[this.getLength()];
+		int[] step = new int[this.getLength()];
 		for (int i=0; i<this.getLength(); i++){
-			newVector[i] = stepDirection(targetVector.getVector()[i],this.getVector()[i]);
+			step[i] = stepDirection(targetVector.getVector()[i],this.getVector()[i]);
 		}
-		return new Vector(newVector);
+		return step;
 	}
 	
 	/**
@@ -256,7 +256,7 @@ public class Vector {
 	 * 
 	 * @param 	neighbor
 	 * 			The Vector we want to check
-	 * @return	Whether the neighbor is occupying a adjacant or the same cube as this.
+	 * @return	Whether the neighbor is occupying a adjacent or the same cube as this.
 	 * 			| result == isValidAdjoint(getCubeCoordinates()[0]-neighbour.getCubeCoordinates()[0]) && 
 				| isValidAdjoint(getCubeCoordinates()[1]-neighbour.getCubeCoordinates()[1]) &&
 				| (getCubeCoordinates()[2] == neighbour.getCubeCoordinates()[2]))
@@ -265,6 +265,22 @@ public class Vector {
 		return (isValidAdjoint(this.getCubeCoordinates()[0]-neighbor.getCubeCoordinates()[0]) && 
 				isValidAdjoint(this.getCubeCoordinates()[1]-neighbor.getCubeCoordinates()[1]) &&
 				(this.getCubeCoordinates()[2] == neighbor.getCubeCoordinates()[2]));
+	}
+	
+	/**
+	 * Returns whether neighbor is in a neighboring cube.
+	 * 
+	 * @param 	neighbor
+	 * 			The Vector we want to check
+	 * @return	Whether the neighbor is occupying a adjacent or the same cube as this.
+	 * 			| result == isValidAdjoint(getCubeCoordinates()[0]-neighbour.getCubeCoordinates()[0]) && 
+				| isValidAdjoint(getCubeCoordinates()[1]-neighbour.getCubeCoordinates()[1]) &&
+				| isValidAdjoint(getCubeCoordinates()[2]-neighbour.getCubeCoordinates()[2]))
+	 */
+	public boolean isNeighboringCube(Vector neighbor){
+		return (isValidAdjoint(this.getCubeCoordinates()[0]-neighbor.getCubeCoordinates()[0]) && 
+				isValidAdjoint(this.getCubeCoordinates()[1]-neighbor.getCubeCoordinates()[1]) &&
+				isValidAdjoint(this.getCubeCoordinates()[2]-neighbor.getCubeCoordinates()[2]));
 	}
 	
 	/**
@@ -385,7 +401,7 @@ public class Vector {
 	
 	public boolean isOnEdge(){
 		for (int i=0;i<this.getLength();i++){
-			if (Util.fuzzyEquals(this.getVector()[i],Math.round(this.getVector()[i]),0.1))
+			if (Util.fuzzyEquals(this.getVector()[i],Math.round(this.getVector()[i]),0.05))
 				return true;
 		}
 		return false;
