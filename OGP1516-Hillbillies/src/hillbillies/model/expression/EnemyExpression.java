@@ -3,7 +3,7 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class EnemyExpression extends NullaryExpression {
+public class EnemyExpression extends NullaryExpression<Unit>{
 
 	public EnemyExpression(SourceLocation loc) {
 		super(loc);

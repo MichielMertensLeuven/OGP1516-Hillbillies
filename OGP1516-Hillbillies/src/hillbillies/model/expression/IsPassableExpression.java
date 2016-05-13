@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class IsPassableExpression extends UnaryExpression {
+public class IsPassableExpression extends UnaryExpression<Boolean, int[]>{
 
-	public IsPassableExpression(Expression cube, SourceLocation loc) {
+	public IsPassableExpression(Expression<int[]> cube, SourceLocation loc) {
 		super(cube, loc);
 	}
 	

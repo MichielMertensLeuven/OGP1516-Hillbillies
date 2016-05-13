@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class IsFriendExpression extends UnaryExpression {
+public class IsFriendExpression extends UnaryExpression<Boolean, Unit>{
 
-	public IsFriendExpression(Expression unit, SourceLocation loc) {
+	public IsFriendExpression(Expression<Unit> unit, SourceLocation loc) {
 		super(unit, loc);
 	}
 	

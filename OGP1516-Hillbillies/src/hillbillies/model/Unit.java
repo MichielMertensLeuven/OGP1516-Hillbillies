@@ -710,7 +710,7 @@ public class Unit extends GameObject{
 	 * 			| result == ((dt>0) && (dt <0.2))
 	 */
 	private static boolean isValidDuration(double dt){
-		return (dt>0) && (Util.fuzzyLessThanOrEqualTo(dt, 0.2));
+		return (Util.fuzzyGreaterThanOrEqualTo(dt, 0)) && (Util.fuzzyLessThanOrEqualTo(dt, 0.2));
 	}
 
  	/**
@@ -1073,7 +1073,7 @@ public class Unit extends GameObject{
 			if (this.defaultBehaviorEnabled && !this.isSprinting() && 
 					!this.hasTriedSprintingDuringThisMove &&
 					(this.getCurrentStaminaPoints()>Unit.minStaminaPoints)) {
-				if (Math.random() > 0.25)
+				if (Math.random() < 0.25)
 				{
 					this.startSprinting();
 				}
@@ -1091,10 +1091,14 @@ public class Unit extends GameObject{
 				try{
 					this.moveTo(this.targetPosition.getCubeCoordinates());
 				} catch (IllegalArgumentException e){
-					if (!e.getMessage().equals("Position not reachable"))
-						throw e;
-					else{
+					if (e.getMessage().equals("Can not stand on selected cube")){
+						System.out.println("collapsed catch");
 						shouldContinue = false;
+					}
+					else if (e.getMessage().equals("Position not reachable"))
+						shouldContinue = false;
+					else{
+						throw e;
 					}
 				}
 			}
@@ -1754,7 +1758,7 @@ public class Unit extends GameObject{
 				throw new IllegalArgumentException("Invalid position to fight");
 			if (this.getFaction() == defender.getFaction())
 				throw new IllegalArgumentException("Unit from the same faction");
-		} //TODO
+		}
 		this.attack(defender);
 		defender.defend(this);
 	}
@@ -2210,7 +2214,8 @@ public class Unit extends GameObject{
 					try{
 					this.moveTo(this.getWorld().getRandomCube());
 					} catch (IllegalArgumentException e) {
-						if (!e.getMessage().equals("Position not reachable"))
+						if (!e.getMessage().equals("Position not reachable") 
+								&& !e.getMessage().equals("Already standing on selected cube"))
 							throw e;
 				}
 			}

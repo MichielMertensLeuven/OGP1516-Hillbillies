@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class IsSolidExpression extends UnaryExpression {
+public class IsSolidExpression extends UnaryExpression<Boolean, int[]>{
 
-	public IsSolidExpression(Expression cube, SourceLocation loc) {
+	public IsSolidExpression(Expression<int[]> cube, SourceLocation loc) {
 		super(cube, loc);
 	}
 	

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -243,9 +244,17 @@ public class World {
 		if (!isValidDuration(duration))
 			throw new IllegalArgumentException(Double.toString(duration));
 		// collapsing cubes
-		for (int[] cube: this.cubesToCollapse.keySet()){
-			this.advanceCollapse(cube, duration); // TODO !! concurrent modification
+		Iterator<int[]> cubeIterator = this.cubesToCollapse.keySet().iterator();
+		while(cubeIterator.hasNext()){
+			int[] cube = cubeIterator.next();
+			if(this.advanceCollapse(cube, duration)){
+				this.collapseCube(cube[0], cube[1], cube[2]);
+				cubeIterator.remove();
+			}
 		}
+//		for (int[] cube: this.cubesToCollapse.keySet()){
+//			this.advanceCollapse(cube, duration); // TODO !! concurrent modification
+//		}
 		// advancing time for gameObjects
 		Set<GameObject> gameObjects = new HashSet<>();
 		gameObjects.addAll(this.getGameObjects());
@@ -264,7 +273,7 @@ public class World {
 	 * 			| result == ((dt>0) && (dt <0.2))
 	 */
 	private static boolean isValidDuration(double dt){
-		return (dt>0) && (Util.fuzzyLessThanOrEqualTo(dt, 0.2));
+		return (Util.fuzzyGreaterThanOrEqualTo(dt, 0)) && (Util.fuzzyLessThanOrEqualTo(dt, 0.2));
 	}
 	
 	public boolean isValidWorkshop(int x, int y, int z){
@@ -287,16 +296,19 @@ public class World {
 				this.addGameObjectToWorld(new Log(position));
 	}
 	
-	private void advanceCollapse(int[] cube, double dt) throws IllegalArgumentException{
+	private boolean advanceCollapse(int[] cube, double dt) throws IllegalArgumentException{
 		if (!this.cubesToCollapse.containsKey(cube))
 			throw new IllegalArgumentException();
 		double timeLeft = this.cubesToCollapse.get(cube);
-		if (timeLeft > dt){
+		boolean collapse = Util.fuzzyLessThanOrEqualTo(timeLeft, dt);
+		if (!collapse){
 			this.cubesToCollapse.put(cube, timeLeft-dt);
-		} else{
-			this.cubesToCollapse.remove(cube);
-			this.collapseCube(cube[0], cube[1], cube[2]);
 		}
+		return collapse;
+//		} else{ //TODO
+//			this.cubesToCollapse.remove(cube);
+//			this.collapseCube(cube[0], cube[1], cube[2]);
+//		}
 	}
 	
 	public boolean isSolidConnectedToBorder(int x, int y, int z) throws IllegalArgumentException{

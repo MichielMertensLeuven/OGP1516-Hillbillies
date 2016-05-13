@@ -5,16 +5,16 @@ import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
 public class WorkStatement extends ActionStatement{
-	public WorkStatement(Expression target, SourceLocation loc){
+	public WorkStatement(Expression<int[]> target, SourceLocation loc){
 		// could check if expression returns position. But work alone.
 		super(loc);
 		this.target = target;
 	}
 	
-	private Expression target;
+	private Expression<int[]> target;
 	
 	private int[] getTargetCube(){
-		return (int[]) target.getResult(this.getExectutingUnit());
+		return target.getResult(this.getExectutingUnit());
 	}
 	
 	@Override

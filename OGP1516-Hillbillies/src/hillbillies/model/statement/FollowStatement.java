@@ -5,13 +5,13 @@ import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
 public class FollowStatement extends ActionStatement{
-	public FollowStatement(Expression targetUnit, SourceLocation loc){
+	public FollowStatement(Expression<Unit> targetUnit, SourceLocation loc){
 		super(loc);
 		this.targetUnitExpression = targetUnit;
 	}
 	
 	private Unit targetUnit = null;
-	private Expression targetUnitExpression;
+	private Expression<Unit> targetUnitExpression;
 	
 	@Override
 	public String toString(){
@@ -21,7 +21,7 @@ public class FollowStatement extends ActionStatement{
 	@Override
 	public void execute(Unit unit) {
 		super.setExecutingUnit(unit);
-		this.targetUnit = (Unit) targetUnitExpression.getResult(this.getExectutingUnit());
+		this.targetUnit = targetUnitExpression.getResult(this.getExectutingUnit());
 		this.advanceTime();
 	}
 	

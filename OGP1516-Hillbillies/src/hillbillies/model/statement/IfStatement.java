@@ -6,7 +6,7 @@ import hillbillies.part3.programs.SourceLocation;
 
 public class IfStatement extends Statement {
 
-	public IfStatement(Expression condition, Statement ifBody, Statement elseBody, SourceLocation loc) {
+	public IfStatement(Expression<Boolean> condition, Statement ifBody, Statement elseBody, SourceLocation loc) {
 		super(loc);
 		this.condition = condition;
 		this.ifBody = ifBody;
@@ -18,7 +18,7 @@ public class IfStatement extends Statement {
 	@Override
 	public void execute(Unit unit) {
 		this.setExecutingUnit(unit);
-		if ((boolean) this.condition.getResult(this.getExectutingUnit()))
+		if (this.condition.getResult(this.getExectutingUnit()))
 			this.selectedBody = this.ifBody;
 		else
 			this.selectedBody = this.elseBody;
@@ -41,7 +41,7 @@ public class IfStatement extends Statement {
 			this.selectedBody.advanceTime();
 	}
 
-	private Expression condition;
+	private Expression<Boolean> condition;
 	private Statement ifBody;
 	private Statement elseBody;
 	private Statement selectedBody;

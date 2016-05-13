@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class CarriesItemExpression extends UnaryExpression {
+public class CarriesItemExpression extends UnaryExpression<Boolean, Unit>{
 
-	public CarriesItemExpression(Expression unit, SourceLocation loc) {
+	public CarriesItemExpression(Expression<Unit> unit, SourceLocation loc) {
 		super(unit, loc);
 	}
 

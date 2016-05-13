@@ -3,7 +3,7 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class WorkshopPositionExpression extends NullaryExpression {
+public class WorkshopPositionExpression extends NullaryExpression<int[]>{
 
 	public WorkshopPositionExpression(SourceLocation loc) {
 		super(loc);

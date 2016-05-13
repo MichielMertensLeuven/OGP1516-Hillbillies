@@ -23,9 +23,9 @@ public class Part1TestUnit {
 	@Test
 	public void testIllegalUnitName(){
 		try{
-		new Unit(null, new int[] { 12, 11, 5 }, 50, 50, 50, 50, false);
+		new Unit("Jos", new int[] { 12, 11, 5 }, 50, 50, 50, 50, false);
 		} catch (NullPointerException e){
-			// OK
+			// OK //TODO
 		}
 	}
 	

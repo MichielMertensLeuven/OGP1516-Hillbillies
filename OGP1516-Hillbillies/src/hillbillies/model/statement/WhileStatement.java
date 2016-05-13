@@ -6,7 +6,7 @@ import hillbillies.part3.programs.SourceLocation;
 
 public class WhileStatement extends Statement {
 
-	public WhileStatement(Expression condition, Statement body, SourceLocation loc) {
+	public WhileStatement(Expression<Boolean> condition, Statement body, SourceLocation loc) {
 		super(loc);
 		this.condition = condition;
 		this.body = body;
@@ -16,7 +16,7 @@ public class WhileStatement extends Statement {
 	@Override
 	public void execute(Unit unit) {
 		this.setExecutingUnit(unit);
-		if ((boolean) this.condition.getResult(this.getExectutingUnit()))
+		if (this.condition.getResult(this.getExectutingUnit()))
 			this.body.execute(unit);
 		else
 			this.isFinished = true;
@@ -33,13 +33,13 @@ public class WhileStatement extends Statement {
 			if (!this.body.isFinished())
 				this.body.advanceTime();
 			else
-				if ((boolean) this.condition.getResult(super.getExectutingUnit()))
+				if (this.condition.getResult(super.getExectutingUnit()))
 					this.body.execute(super.getExectutingUnit());
 				else
 					this.isFinished = true;
 	}
 
-	private Expression condition;
+	private Expression<Boolean> condition;
 	private Statement body;
 	private boolean isFinished;
 	

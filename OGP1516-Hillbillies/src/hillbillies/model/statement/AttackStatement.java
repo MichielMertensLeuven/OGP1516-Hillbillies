@@ -5,15 +5,15 @@ import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
 public class AttackStatement extends ActionStatement{
-	public AttackStatement(Expression targetUnit, SourceLocation loc){
+	public AttackStatement(Expression<Unit> targetUnit, SourceLocation loc){
 		super(loc);
 		this.targetUnit = targetUnit;
 	}
 	
-	private Expression targetUnit;
+	private Expression<Unit> targetUnit;
 	
 	private Unit getTargetUnit(){
-		return (Unit) targetUnit.getResult(this.getExectutingUnit());
+		return targetUnit.getResult(this.getExectutingUnit());
 	} //TODO what if this.getExecutingUnit == null?
 	
 	@Override

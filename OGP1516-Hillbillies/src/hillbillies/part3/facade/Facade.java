@@ -53,7 +53,6 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public ITaskFactory<Expression, Statement, Task> createTaskFactory() {
-		// TODO Auto-generated method stub
 		return new TaskFactory();
 	}
 
@@ -77,8 +76,8 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public boolean isWellFormed(Task task) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
+		// work alone
 	}
 
 	/**
@@ -145,8 +144,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public boolean areTasksPartOf(Scheduler scheduler, Collection<Task> tasks) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return scheduler.areTasksPartOf(tasks);
 	}
 
 	/**
@@ -166,8 +164,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public Iterator<Task> getAllTasksIterator(Scheduler scheduler) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return scheduler.iterator();
 	}
 
 	/**
@@ -197,8 +194,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public Unit getAssignedUnit(Task task) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return task.getExecutingUnit();
 	}
 
 	/**
@@ -213,11 +209,8 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public Task getAssignedTask(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return unit.getTask();
 	}
-
-
 
 	/**
 	 * Return the name of the given task.
@@ -230,11 +223,8 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public String getName(Task task) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return task.getName();
 	}
-
-
 
 	/**
 	 * Return the priority of the given task.
@@ -247,7 +237,6 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
  	@Override
 	public int getPriority(Task task) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return task.getPriority();
 	}
 }

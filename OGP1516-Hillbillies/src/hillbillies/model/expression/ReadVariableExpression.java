@@ -4,7 +4,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.statement.AssignmentStatement;
 import hillbillies.part3.programs.SourceLocation;
 
-public class ReadVariableExpression extends NullaryExpression {
+public class ReadVariableExpression<T> extends NullaryExpression<T> {
 
 	public ReadVariableExpression(String name, SourceLocation loc) {
 		super(loc);
@@ -14,8 +14,8 @@ public class ReadVariableExpression extends NullaryExpression {
 	private String name;
 	
 	@Override
-	public Object getResult(Unit unit) {
-		return AssignmentStatement.getVariable(this.name);
+	public T getResult(Unit unit) {
+		return (T) AssignmentStatement.getVariable(this.name);
 	}
 
 	@Override

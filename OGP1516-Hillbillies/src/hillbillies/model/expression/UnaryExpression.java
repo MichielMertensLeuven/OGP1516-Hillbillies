@@ -4,12 +4,13 @@ import be.kuleuven.cs.som.annotate.*;
 import hillbillies.part3.programs.SourceLocation;
 
 /**
+ * @param <subExpression>
  * @invar  The expression of each UnaryExpression must be a valid expression for any
  *         UnaryExpression.
  *       | isValidExpression(getExpression())
  */
 
-public abstract class UnaryExpression extends Expression {
+public abstract class UnaryExpression<T,U> extends Expression<T> {
 	
 	/**
 	 * Initialize this new UnaryExpression with given expression.
@@ -20,7 +21,7 @@ public abstract class UnaryExpression extends Expression {
 	 *         the given expression.
 	 *       | this.setExpression(expression)
 	 */
-	public UnaryExpression(Expression subExpression, SourceLocation loc) {
+	public UnaryExpression(Expression<U> subExpression, SourceLocation loc) {
 		super(loc);
 		this.setSubExpression(subExpression);
 	}
@@ -29,7 +30,7 @@ public abstract class UnaryExpression extends Expression {
 	 * Return the expression of this UnaryExpression.
 	 */
 	@Basic @Raw
-	public Expression getSubExpression() {
+	public Expression<U> getSubExpression() {
 		return this.subExpression;
 	}
 	
@@ -42,7 +43,7 @@ public abstract class UnaryExpression extends Expression {
 	 * @return 
 	 *       | result == true
 	*/
-	public static boolean isValidSubExpression(Expression subExpression) {
+	public boolean isValidSubExpression(Expression<U> subExpression) {
 		return true;
 	}
 	
@@ -60,7 +61,7 @@ public abstract class UnaryExpression extends Expression {
 	 *       | ! isValidExpression(getExpression())
 	 */
 	@Raw
-	public void setSubExpression(Expression subExpression) 
+	public void setSubExpression(Expression<U> subExpression) 
 			throws IllegalArgumentException {
 		if (! isValidSubExpression(subExpression))
 			throw new IllegalArgumentException();
@@ -70,6 +71,6 @@ public abstract class UnaryExpression extends Expression {
 	/**
 	 * Variable registering the expression of this UnaryExpression.
 	 */
-	private Expression subExpression;
+	private Expression<U> subExpression;
 }
 

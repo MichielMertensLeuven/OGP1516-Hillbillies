@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class IsAliveExpression extends UnaryExpression {
+public class IsAliveExpression extends UnaryExpression<Boolean, Unit>{
 
-	public IsAliveExpression(Expression unit, SourceLocation loc) {
+	public IsAliveExpression(Expression<Unit> unit, SourceLocation loc) {
 		super(unit, loc);
 	}
 	

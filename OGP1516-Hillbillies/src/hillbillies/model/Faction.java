@@ -8,7 +8,7 @@ import be.kuleuven.cs.som.annotate.Immutable;
 public class Faction {
 	
 	public Faction(){
-		this.scheduler = new Scheduler();
+		this.scheduler = new Scheduler(this);
 	}
 
 	public Faction(Unit unit){
@@ -44,7 +44,6 @@ public class Faction {
 	private Set<Unit> unitsInFaction = new HashSet<Unit>();
 	
 	private static final int maxNbUnitsInFaction = 50;
-	
 	
 	private final Scheduler scheduler;
 	

@@ -9,7 +9,7 @@ import hillbillies.part3.programs.SourceLocation;
  *       | isValidExpression(getExpression())
  */
 
-public abstract class BinaryExpression extends Expression {
+public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	
 	/**
 	 * Initialize this new UnaryExpression with given expression.
@@ -20,7 +20,7 @@ public abstract class BinaryExpression extends Expression {
 	 *         the given expression.
 	 *       | this.setExpression(expression)
 	 */
-	public BinaryExpression(Expression leftExpression, Expression rightExpression, SourceLocation loc) {
+	public BinaryExpression(Expression<U> leftExpression, Expression<V> rightExpression, SourceLocation loc) {
 		super(loc);
 		this.setLeftExpression(leftExpression);
 		this.setRightExpression(rightExpression);
@@ -30,7 +30,7 @@ public abstract class BinaryExpression extends Expression {
 	 * Return the expression of this UnaryExpression.
 	 */
 	@Basic @Raw
-	public Expression getLeftExpression() {
+	public Expression<U> getLeftExpression() {
 		return this.leftExpression;
 	}
 	
@@ -38,7 +38,7 @@ public abstract class BinaryExpression extends Expression {
 	 * Return the expression of this UnaryExpression.
 	 */
 	@Basic @Raw
-	public Expression getRightExpression() {
+	public Expression<V> getRightExpression() {
 		return this.rightExpression;
 	}
 
@@ -52,7 +52,7 @@ public abstract class BinaryExpression extends Expression {
 	 * @return 
 	 *       | result == true
 	*/
-	public static boolean isValidLeftExpression(Expression leftExpression) {
+	public boolean isValidLeftExpression(Expression<U> leftExpression) {
 		return true;
 	}
 	
@@ -65,7 +65,7 @@ public abstract class BinaryExpression extends Expression {
 	 * @return 
 	 *       | result == true
 	*/
-	public static boolean isValidRightExpression(Expression rightExpression) {
+	public boolean isValidRightExpression(Expression<V> rightExpression) {
 		return true;
 	}
 
@@ -84,7 +84,7 @@ public abstract class BinaryExpression extends Expression {
 	 *       | ! isValidExpression(getExpression())
 	 */
 	@Raw
-	public void setLeftExpression(Expression leftExpression) 
+	public void setLeftExpression(Expression<U> leftExpression) 
 			throws IllegalArgumentException {
 		if (! isValidLeftExpression(leftExpression))
 			throw new IllegalArgumentException();
@@ -105,7 +105,7 @@ public abstract class BinaryExpression extends Expression {
 	 *       | ! isValidExpression(getExpression())
 	 */
 	@Raw
-	public void setRightExpression(Expression rightExpression) 
+	public void setRightExpression(Expression<V> rightExpression) 
 			throws IllegalArgumentException {
 		if (! isValidRightExpression(rightExpression))
 			throw new IllegalArgumentException();
@@ -116,11 +116,11 @@ public abstract class BinaryExpression extends Expression {
 	/**
 	 * Variable registering the expression of this UnaryExpression.
 	 */
-	private Expression leftExpression;
+	private Expression<U> leftExpression;
 	
 	/**
 	 * Variable registering the expression of this UnaryExpression.
 	 */
-	private Expression rightExpression;
+	private Expression<V> rightExpression;
 }
 

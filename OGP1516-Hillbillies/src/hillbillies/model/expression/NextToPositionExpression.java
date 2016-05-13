@@ -6,9 +6,9 @@ import hillbillies.model.Helper;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class NextToPositionExpression extends UnaryExpression {
+public class NextToPositionExpression extends UnaryExpression<int[], int[]>{
 
-	public NextToPositionExpression(Expression cube, SourceLocation loc) {
+	public NextToPositionExpression(Expression<int[]> cube, SourceLocation loc) {
 		super(cube, loc);
 	}
 	

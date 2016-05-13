@@ -4,7 +4,7 @@ import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public abstract class Expression{
+public abstract class Expression<T>{
 	/**
 	 * Initialize this new Expression with given SourceLocation.
 	 * 
@@ -31,7 +31,7 @@ public abstract class Expression{
 	 */
 	private final SourceLocation loc;
 	
-	public abstract Object getResult(Unit unit);
+	public abstract T getResult(Unit unit);
 	
 	@Override
 	public abstract String toString();

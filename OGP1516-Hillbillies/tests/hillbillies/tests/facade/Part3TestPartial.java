@@ -49,8 +49,8 @@ public class Part3TestPartial {
 		Scheduler scheduler = facade.getScheduler(faction);
 
 		List<Task> tasks = TaskParser.parseTasksFromString(
-				"name: \"work task\"\npriority: 1\nactivities: work selected;", facade.createTaskFactory(),
-				Collections.singletonList(new int[] { 1, 1, 1 }));
+				"name: \"work task\"\npriority: 1\nactivities: work (1, 1, 1);", facade.createTaskFactory(),
+				Collections.emptyList());
 
 		// tasks are created
 		assertNotNull(tasks);

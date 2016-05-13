@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class AndExpression extends BinaryExpression {
+public class AndExpression extends BinaryExpression<Boolean, Boolean, Boolean>{
 
-	public AndExpression(Expression leftExpression, Expression rightExpression, SourceLocation loc) {
+	public AndExpression(Expression<Boolean> leftExpression, Expression<Boolean> rightExpression, SourceLocation loc) {
 		super(leftExpression, rightExpression, loc);
 	}
 

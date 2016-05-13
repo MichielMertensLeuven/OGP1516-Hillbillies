@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class PositionOfExpression extends UnaryExpression {
+public class PositionOfExpression extends UnaryExpression<int[], Unit>{
 
-	public PositionOfExpression(Expression unit, SourceLocation loc) {
+	public PositionOfExpression(Expression<Unit> unit, SourceLocation loc) {
 		super(unit, loc);
 	}
 	

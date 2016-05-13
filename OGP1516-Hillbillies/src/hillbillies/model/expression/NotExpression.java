@@ -3,9 +3,9 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class NotExpression extends UnaryExpression {
+public class NotExpression extends UnaryExpression <Boolean,Boolean>{
 
-	public NotExpression(Expression subExpression, SourceLocation loc) {
+	public NotExpression(Expression<Boolean> subExpression, SourceLocation loc) {
 		super(subExpression, loc);
 	}
 
