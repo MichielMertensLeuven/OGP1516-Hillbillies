@@ -18,7 +18,7 @@ public class IfStatement extends Statement {
 	@Override
 	public void execute(Unit unit) {
 		this.setExecutingUnit(unit);
-		if (this.condition.getResult(this.getExectutingUnit()))
+		if (this.condition.getResult(this.getExecutingUnit()))
 			this.selectedBody = this.ifBody;
 		else
 			this.selectedBody = this.elseBody;

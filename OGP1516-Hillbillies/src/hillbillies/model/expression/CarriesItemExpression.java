@@ -10,12 +10,12 @@ public class CarriesItemExpression extends UnaryExpression<Boolean, Unit>{
 	}
 
 	@Override
-	public Boolean getResult(Unit unit) {
-		return ((Unit) this.getSubExpression().getResult(unit)).isCarryingMaterial();
+	public Boolean evaluate(Unit carrier, Unit executor) {
+		return carrier.isCarryingMaterial();
 	}
 
 	@Override
-	public String toString() {
-		return "carries item( " + this.getSubExpression() + " )";
+	public String toString(String carrier) {
+		return "carries item( " + carrier + " )";
 	}
 }

@@ -10,13 +10,12 @@ public class IsSolidExpression extends UnaryExpression<Boolean, int[]>{
 	}
 	
 	@Override
-	public Boolean getResult(Unit unit) {
-		int[] cube = (int[]) super.getSubExpression().getResult(unit);
-		return unit.getWorld().isSolid(cube);
+	public Boolean evaluate(int[] cube, Unit executor) {
+		return executor.getWorld().isSolid(cube);
 	}
 
 	@Override
-	public String toString() {
-		return "isSolid( " + this.getSubExpression().toString() + " )";
+	public String toString(String cube) {
+		return "isSolid( " + cube + " )";
 	}
 }

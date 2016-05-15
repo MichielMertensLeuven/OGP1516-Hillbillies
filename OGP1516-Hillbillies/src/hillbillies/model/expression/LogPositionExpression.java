@@ -11,12 +11,12 @@ public class LogPositionExpression extends NullaryExpression<int[]>{
 	}
 	
 	@Override
-	public int[] getResult(Unit unit) {
+	public int[] getResult(Unit executor) {
 		Log currentLog = null;
-		for (Log log:unit.getWorld().getLogs())
+		for (Log log:executor.getWorld().getLogs())
 			if (currentLog == null || 
-			unit.getPosition().distanceBetween(currentLog.getPosition()) > 
-			unit.getPosition().distanceBetween(log.getPosition()))
+			executor.getPosition().distanceBetween(currentLog.getPosition()) > 
+			executor.getPosition().distanceBetween(log.getPosition()))
 				currentLog = log;
 		return currentLog.getPosition().getCubeCoordinates();
 	}

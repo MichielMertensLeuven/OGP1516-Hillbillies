@@ -26,7 +26,7 @@ public class SequenceStatement extends Statement{
 		this.statementIndexToExecute = 0;
 		super.setExecutingUnit(unit);
 		if (!this.isFinished())
-			this.getCurrentStatement().execute(this.getExectutingUnit());
+			this.getCurrentStatement().execute(this.getExecutingUnit());
 	}
 	
 	@Override
@@ -36,7 +36,7 @@ public class SequenceStatement extends Statement{
 			if (this.getCurrentStatement().isFinished()){
 				this.statementIndexToExecute += 1;
 				if (!this.isFinished())
-					this.getCurrentStatement().execute(this.getExectutingUnit());
+					this.getCurrentStatement().execute(this.getExecutingUnit());
 			}
 		}
 	}

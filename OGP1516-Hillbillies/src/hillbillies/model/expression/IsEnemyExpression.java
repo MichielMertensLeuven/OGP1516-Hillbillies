@@ -10,12 +10,12 @@ public class IsEnemyExpression extends UnaryExpression<Boolean, Unit> {
 	}
 	
 	@Override
-	public Boolean getResult(Unit unit) {
-		return !unit.hasSameFaction((Unit) super.getSubExpression().getResult(unit)); 
+	public Boolean evaluate(Unit unit, Unit executor) {
+		return !executor.hasSameFaction(unit); 
 	}
 
 	@Override
-	public String toString() {
-		return "isEnemy( " + this.getSubExpression().toString() + " )";
+	public String toString(String unit)	{
+		return "isEnemy( " + unit  + " )";
 	}
 }

@@ -13,8 +13,9 @@ public class ReadVariableExpression<T> extends NullaryExpression<T> {
 	
 	private String name;
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public T getResult(Unit unit) {
+	public T getResult(Unit executor) {
 		return (T) AssignmentStatement.getVariable(this.name);
 	}
 

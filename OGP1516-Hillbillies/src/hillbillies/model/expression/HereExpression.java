@@ -10,8 +10,8 @@ public class HereExpression extends NullaryExpression<int[]>{
 	}
 
 	@Override
-	public int[] getResult(Unit unit) {
-		return unit.getPosition().getCubeCoordinates();
+	public int[] getResult(Unit executor) {
+		return executor.getPosition().getCubeCoordinates();
 	}
 
 	@Override

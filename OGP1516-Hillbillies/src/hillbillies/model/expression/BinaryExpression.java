@@ -1,13 +1,8 @@
 package hillbillies.model.expression;
 
 import be.kuleuven.cs.som.annotate.*;
+import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
-
-/**
- * @invar  The expression of each UnaryExpression must be a valid expression for any
- *         UnaryExpression.
- *       | isValidExpression(getExpression())
- */
 
 public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	
@@ -41,34 +36,6 @@ public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	public Expression<V> getRightExpression() {
 		return this.rightExpression;
 	}
-
-	
-	/**
-	 * Check whether the given expression is a valid expression for
-	 * any UnaryExpression.
-	 *  
-	 * @param  expression
-	 *         The expression to check.
-	 * @return 
-	 *       | result == true
-	*/
-	public boolean isValidLeftExpression(Expression<U> leftExpression) {
-		return true;
-	}
-	
-	/**
-	 * Check whether the given expression is a valid expression for
-	 * any UnaryExpression.
-	 *  
-	 * @param  expression
-	 *         The expression to check.
-	 * @return 
-	 *       | result == true
-	*/
-	public boolean isValidRightExpression(Expression<V> rightExpression) {
-		return true;
-	}
-
 	
 	/**
 	 * Set the expression of this UnaryExpression to the given expression.
@@ -78,16 +45,11 @@ public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	 * @post   The expression of this new UnaryExpression is equal to
 	 *         the given expression.
 	 *       | new.getExpression() == expression
-	 * @throws IllegalArgumentException
-	 *         The given expression is not a valid expression for any
-	 *         UnaryExpression.
-	 *       | ! isValidExpression(getExpression())
+
 	 */
 	@Raw
 	public void setLeftExpression(Expression<U> leftExpression) 
 			throws IllegalArgumentException {
-		if (! isValidLeftExpression(leftExpression))
-			throw new IllegalArgumentException();
 		this.leftExpression = leftExpression;
 	}
 	
@@ -99,19 +61,13 @@ public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	 * @post   The expression of this new UnaryExpression is equal to
 	 *         the given expression.
 	 *       | new.getExpression() == expression
-	 * @throws IllegalArgumentException
-	 *         The given expression is not a valid expression for any
-	 *         UnaryExpression.
-	 *       | ! isValidExpression(getExpression())
+
 	 */
 	@Raw
 	public void setRightExpression(Expression<V> rightExpression) 
 			throws IllegalArgumentException {
-		if (! isValidRightExpression(rightExpression))
-			throw new IllegalArgumentException();
 		this.rightExpression = rightExpression;
 	}
-	
 	
 	/**
 	 * Variable registering the expression of this UnaryExpression.
@@ -122,5 +78,15 @@ public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	 * Variable registering the expression of this UnaryExpression.
 	 */
 	private Expression<V> rightExpression;
+	public abstract T evaluate(U left, V right, Unit executor);
+	public abstract String toString(String left, String right);
+	public T getResult(Unit executor) {
+		U leftResult  = getLeftExpression() .getResult(executor);
+		V rightResult = getRightExpression().getResult(executor);
+		return evaluate(leftResult, rightResult, executor);
+	}
+	public String toString() {
+		return toString(getLeftExpression().toString(), getRightExpression().toString());
+	}
 }
 

@@ -33,21 +33,21 @@ public abstract class Statement {
 	 */
 	private final SourceLocation loc;
 	
-	public abstract void execute(Unit unit);
+	public abstract void execute(Unit executor);
 	
 	public abstract boolean isFinished();
 	
 	public abstract void advanceTime();
 	
-	public Unit getExectutingUnit(){
-		return this.exectutingUnit;
+	public Unit getExecutingUnit(){
+		return this.executingUnit;
 	}
 	
 	public void setExecutingUnit(Unit unit){
-		this.exectutingUnit = unit; //TODO checker
+		this.executingUnit = unit; //TODO checker
 	}
 	
-	private Unit exectutingUnit;
+	private Unit executingUnit;
 	
 	@Override
 	public abstract String toString();

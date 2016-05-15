@@ -10,8 +10,8 @@ public class ThisExpression extends NullaryExpression<Unit>{
 	}
 
 	@Override
-	public Unit getResult(Unit unit) {
-		return unit;
+	public Unit getResult(Unit executor) {
+		return executor;
 	}
 
 	@Override

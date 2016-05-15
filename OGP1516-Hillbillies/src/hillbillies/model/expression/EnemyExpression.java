@@ -10,15 +10,15 @@ public class EnemyExpression extends NullaryExpression<Unit>{
 	}
 
 	@Override
-	public Unit getResult(Unit unit) {
-		for (Unit other: unit.getWorld().getUnits())
-			if (unit != other && !unit.hasSameFaction(other))
+	public Unit getResult(Unit executor) {
+		for (Unit other: executor.getWorld().getUnits())
+			if (executor != other && !executor.hasSameFaction(other))
 				return other;
 		return null;
 	}
 
 	@Override
 	public String toString() {
-		return "friend";
+		return "enemy";
 	}
 }

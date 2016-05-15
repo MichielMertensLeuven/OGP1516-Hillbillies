@@ -13,7 +13,7 @@ public class AttackStatement extends ActionStatement{
 	private Expression<Unit> targetUnit;
 	
 	private Unit getTargetUnit(){
-		return targetUnit.getResult(this.getExectutingUnit());
+		return targetUnit.getResult(this.getExecutingUnit());
 	} //TODO what if this.getExecutingUnit == null?
 	
 	@Override
@@ -22,14 +22,14 @@ public class AttackStatement extends ActionStatement{
 	}
 
 	@Override
-	public void execute(Unit unit) {
-		super.setExecutingUnit(unit);
-		unit.fight(this.getTargetUnit());
+	public void execute(Unit executor) {
+		super.setExecutingUnit(executor);
+		executor.fight(this.getTargetUnit());
 	}
 
 	@Override
 	public boolean isFinished() {
-		return !super.getExectutingUnit().isAttacking(); //TODO klopt dit?
+		return !super.getExecutingUnit().isAttacking(); //TODO klopt dit?
 	}
 
 	

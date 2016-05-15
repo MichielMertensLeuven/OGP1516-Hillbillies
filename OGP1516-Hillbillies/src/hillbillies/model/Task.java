@@ -14,9 +14,9 @@ import hillbillies.model.statement.Statement;
  */
 public class Task implements Comparable<Task>{
 
-	private String name;
-	private int priority;
-	private Statement activity;
+	private final String name;
+	private final int priority;
+	private final Statement activity;
 	private Set<Scheduler> schedulers;
 
 	public Task(String name, int priority, Statement activity) {
@@ -114,27 +114,36 @@ public class Task implements Comparable<Task>{
 	public boolean isBeingExecuted(){
 		return (this.executingUnit != null);
 	}
-
+	
+	// never return 0, to avoid tasks being eliminated as duplicates
+	// while using TreeSet in scheduler. //TODO Commentaar
 	@Override
 	public int compareTo(Task other) {
 		if (this.getPriority() > other.getPriority())
-			return 1;
-		else if (this.getPriority() == other.getPriority())
+			return -1;
+		if (this.equals(other))
 			return 0;
 		else
-			return -1;
+			return 1;
 	}
 	
 	public Set<Scheduler> getSchedulers(){
 		return this.schedulers;
 	}
 	
-	public void addScheduler(Scheduler sheduler){
-		this.schedulers.add(sheduler);
+	public void addScheduler(Scheduler scheduler) throws IllegalStateException{
+		if (!scheduler.isTaskPartOf(this))
+			throw new IllegalStateException();
+		this.schedulers.add(scheduler);
 	}
 	
-	public void removeScheduler(Scheduler scheduler){
+	public void removeScheduler(Scheduler scheduler) throws IllegalStateException{
+		if (scheduler.isTaskPartOf(this))
+			throw new IllegalStateException();
 		this.schedulers.remove(scheduler);
 	}
 	
+	public boolean equals(Task other){
+		return (this == other);
+	}
 }

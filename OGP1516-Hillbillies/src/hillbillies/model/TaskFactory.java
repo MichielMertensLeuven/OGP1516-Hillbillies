@@ -8,52 +8,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.Task;
 import hillbillies.model.expression.*;
 import hillbillies.model.statement.*;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
 
+//Expression without type in ITaskFactory, while Expression<T> used in implementation.
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
-	
-//	/**
-//	 * Creates an implementation of IProgramFactory where the implementation of
-//	 * each interface method (except createProgram) just creates a
-//	 * PrintingObject with all arguments.
-//	 */
-//	@SuppressWarnings("unchecked")
-//	public static ITaskFactory<Expression, Statement, Task> create() {
-//
-//		InvocationHandler handler = new InvocationHandler() {
-//
-//			@Override
-//			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-//				if (method.getName().equals("createTasks")) {
-//					return Collections
-//							.singletonList(new Task((String) args[0], (int) args[1], (PrintingObject) args[2]));
-//				}
-//				if (method.getName().equals("createLiteralPosition")) {
-//					System.out.println("LIT POS" + Arrays.deepToString(args));
-//					//return this.createLiteralPosition((int) args[0], (int) args[1], (int) args[2], (SourceLocation) args[3]);
-//				}
-//				if (args != null) {
-//					SourceLocation sourceLocation = (SourceLocation) args[args.length - 1];
-//					if (args.length >= 1) {
-//						return new PrintingObject(sourceLocation, method.getName(),
-//								Arrays.copyOfRange(args, 0, args.length - 1));
-//					} else {
-//						return new PrintingObject(sourceLocation, method.getName());
-//					}
-//				} else {
-//					return new PrintingObject(null, method.getName());
-//				}
-//			}
-//		};
-//
-//		return (ITaskFactory<Expression, Statement, Task>) Proxy
-//				.newProxyInstance(ITaskFactory.class.getClassLoader(), new Class[] { ITaskFactory.class }, handler);
-//	}
-	
 	public TaskFactory(){
 	}
 
@@ -413,7 +377,6 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
 	 * @param position
 	 * 
 	 */
-	//TODO direct neighboring cubes??
 	@Override
 	public Expression createNextToPosition(Expression position, SourceLocation sourceLocation) {
 		return new NextToPositionExpression(position, sourceLocation);

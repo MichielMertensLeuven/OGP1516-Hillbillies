@@ -16,7 +16,7 @@ public class WhileStatement extends Statement {
 	@Override
 	public void execute(Unit unit) {
 		this.setExecutingUnit(unit);
-		if (this.condition.getResult(this.getExectutingUnit()))
+		if (this.condition.getResult(this.getExecutingUnit()))
 			this.body.execute(unit);
 		else
 			this.isFinished = true;
@@ -33,8 +33,8 @@ public class WhileStatement extends Statement {
 			if (!this.body.isFinished())
 				this.body.advanceTime();
 			else
-				if (this.condition.getResult(super.getExectutingUnit()))
-					this.body.execute(super.getExectutingUnit());
+				if (this.condition.getResult(super.getExecutingUnit()))
+					this.body.execute(super.getExecutingUnit());
 				else
 					this.isFinished = true;
 	}

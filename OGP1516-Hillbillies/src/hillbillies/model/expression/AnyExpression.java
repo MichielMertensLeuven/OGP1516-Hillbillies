@@ -13,13 +13,13 @@ public class AnyExpression extends NullaryExpression<Unit>{
 	
 	//TODO echt random of niet nodig?
 	@Override
-	public Unit getResult(Unit unit) {
-		int nbUnits = unit.getWorld().getUnits().size();
-		Unit other = unit;
+	public Unit getResult(Unit executor) {
+		int nbUnits = executor.getWorld().getUnits().size();
+		Unit other = executor;
 		if (nbUnits > 1){
-			while (unit == other){
+			while (executor == other){
 				int rand = (int) Math.random()*nbUnits;
-				Iterator<Unit> iter = unit.getWorld().getUnits().iterator();
+				Iterator<Unit> iter = executor.getWorld().getUnits().iterator();
 				for (int i=0; i<rand; i++)
 					iter.next();
 				other = iter.next();

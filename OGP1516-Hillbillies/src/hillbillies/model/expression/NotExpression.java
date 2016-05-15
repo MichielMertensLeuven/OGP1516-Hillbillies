@@ -10,13 +10,13 @@ public class NotExpression extends UnaryExpression <Boolean,Boolean>{
 	}
 
 	@Override
-	public Boolean getResult(Unit unit) {
-		return !(Boolean) super.getSubExpression().getResult(unit);
+	public Boolean evaluate(Boolean condition, Unit executor) {
+		return !condition;
 	}
 
 	@Override
-	public String toString() {
-		return "not( " + super.getSubExpression().toString() + " )";
+	public String toString(String condition) {
+		return "not( " + condition + " )";
 	}
 
 }

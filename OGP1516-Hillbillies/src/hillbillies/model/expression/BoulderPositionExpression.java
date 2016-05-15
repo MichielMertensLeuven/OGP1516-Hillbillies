@@ -11,13 +11,15 @@ public class BoulderPositionExpression extends NullaryExpression<int[]>{
 	}
 	
 	@Override
-	public int[] getResult(Unit unit) {
+	public int[] getResult(Unit executor) {
 		Boulder currentBoulder = null;
-		for (Boulder boulder:unit.getWorld().getBoulders())
+		for (Boulder boulder:executor.getWorld().getBoulders())
 			if (currentBoulder == null || 
-			unit.getPosition().distanceBetween(currentBoulder.getPosition()) > 
-			unit.getPosition().distanceBetween(boulder.getPosition()))
+			executor.getPosition().distanceBetween(currentBoulder.getPosition()) > 
+			executor.getPosition().distanceBetween(boulder.getPosition()))
 				currentBoulder = boulder;
+		if (currentBoulder == null)
+			return null;
 		return currentBoulder.getPosition().getCubeCoordinates();
 	}
 

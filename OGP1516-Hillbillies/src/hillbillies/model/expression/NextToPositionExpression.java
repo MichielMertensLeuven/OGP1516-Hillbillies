@@ -13,10 +13,9 @@ public class NextToPositionExpression extends UnaryExpression<int[], int[]>{
 	}
 	
 	@Override
-	public int[] getResult(Unit unit) {
-		int[] cube = (int[]) super.getSubExpression().getResult(unit);
+	public int[] evaluate(int[] cube, Unit executor) {
 		List<Integer[]> neighbours =
-				unit.getWorld().getValidNeigbouringCubes(Helper.converter(cube));
+				executor.getWorld().getValidNeigbouringCubes(Helper.converter(cube));
 		int nbNeighbours = neighbours.size();
 		if (nbNeighbours != 0)
 			return Helper.converter(neighbours.get(0));
@@ -24,7 +23,7 @@ public class NextToPositionExpression extends UnaryExpression<int[], int[]>{
 		}
 
 	@Override
-	public String toString() {
-		return "next to " + this.getSubExpression().toString();
+	public String toString(String cube)	{
+		return "next to " + cube;
 	}
 }

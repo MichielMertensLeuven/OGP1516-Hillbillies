@@ -10,12 +10,12 @@ public class PositionOfExpression extends UnaryExpression<int[], Unit>{
 	}
 	
 	@Override
-	public int[] getResult(Unit unit) {
-		return ((Unit) super.getSubExpression().getResult(unit)).getPosition().getCubeCoordinates(); 
+	public int[] evaluate(Unit unit, Unit executor) {
+		return unit.getPosition().getCubeCoordinates();
 	}
 
 	@Override
-	public String toString() {
-		return "positionOf( " + this.getSubExpression().toString() + " )";
+	public String toString(String unit) {
+		return "positionOf( " + unit + " )";
 	}
 }

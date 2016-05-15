@@ -17,8 +17,14 @@ public class AssignmentStatement extends Statement {
 	}
 
 	@Override
-	public void execute(Unit unit) {
-		variableTable.put(this.name, this.value.getResult(unit));
+	public void execute(Unit executor) throws IllegalArgumentException {
+		Object result = this.value.getResult(executor);
+		if (variableTable.containsKey(name)) {
+			if (variableTable.get(name).getClass() != result.getClass()) {
+				throw new IllegalArgumentException("assignment to " + name + " of type " + result.getClass() + ", while " + variableTable.get(name).getClass() + " expected");
+			}
+		}
+		variableTable.put(this.name, result);
 		this.isExecuted = true;
 	}
 
@@ -35,7 +41,7 @@ public class AssignmentStatement extends Statement {
 	private String name;
 	private Expression value;
 	private boolean isExecuted;
-	private static Map<String, Object> variableTable = new HashMap<>(); 
+	private static Map<String, Object> variableTable = new HashMap<>();
 	
 	@Override
 	public String toString() {

@@ -14,7 +14,7 @@ public class WorkStatement extends ActionStatement{
 	private Expression<int[]> target;
 	
 	private int[] getTargetCube(){
-		return target.getResult(this.getExectutingUnit());
+		return target.getResult(this.getExecutingUnit());
 	}
 	
 	@Override
@@ -30,7 +30,7 @@ public class WorkStatement extends ActionStatement{
 
 	@Override
 	public boolean isFinished() {
-		return !super.getExectutingUnit().isWorking();
+		return !super.getExecutingUnit().isWorking();
 	}
 
 	

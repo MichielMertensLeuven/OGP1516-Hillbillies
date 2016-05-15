@@ -4,17 +4,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import hillbillies.model.Boulder;
 import hillbillies.model.Faction;
-import hillbillies.model.Log;
 import hillbillies.model.Scheduler;
 import hillbillies.model.Task;
 import hillbillies.model.TaskFactory;
 import hillbillies.model.Unit;
-import hillbillies.model.World;
 import hillbillies.model.expression.Expression;
 import hillbillies.model.statement.Statement;
-import hillbillies.part2.listener.TerrainChangeListener;
 import hillbillies.part3.programs.ITaskFactory;
 import ogp.framework.util.ModelException;
 
@@ -51,6 +47,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 * @return An instance of ITaskFactory. See the documentation of that
 	 *         interface for an explanation of its parameters.
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public ITaskFactory<Expression, Statement, Task> createTaskFactory() {
 		return new TaskFactory();
@@ -126,7 +123,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public void replace(Scheduler scheduler, Task original, Task replacement) throws ModelException {
-		// TODO Auto-generated method stub	
+		scheduler.replaceTask(original, replacement);
 	}
 
 	/**
@@ -178,8 +175,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public Set<Scheduler> getSchedulersForTask(Task task) throws ModelException {
-		// TODO Auto-generated method stub
-		return null;
+		return task.getSchedulers();
 	}
 
 	/**

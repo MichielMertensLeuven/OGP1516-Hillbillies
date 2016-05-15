@@ -1,10 +1,8 @@
 package hillbillies.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,14 +32,17 @@ public class Scheduler implements Iterable<Task>{
 	private TreeSet<Task> tasks;
 	
 	public void addTask(Task task) {
-		//TODO controle toevoegen
 		this.tasks.add(task);
 		task.addScheduler(this);
-		System.out.println("task added " + task.getName());
+	}
+	
+	public void replaceTask(Task originalTask, Task replacementTask){
+		this.removeTask(originalTask);
+		this.addTask(replacementTask);
 	}
 	
 	public Task getHighestPriorityTask(){
-		if (this.tasks.size() == 0)
+		if (this.getAllTasks().size() == 0)
 			return null;
 		Iterator<Task> taskIterator = this.iterator();
 		Task task = taskIterator.next();
@@ -57,12 +58,11 @@ public class Scheduler implements Iterable<Task>{
 	public void removeTask(Task task){
 		this.tasks.remove(task);
 		task.removeScheduler(this);
-		System.out.println("task removed " + task.getName());
 	}
 
 	@Override
 	public Iterator<Task> iterator() {
-		return this.tasks.iterator();
+		return this.getAllTasks().iterator();
 	}
 	
 	/**
@@ -80,9 +80,30 @@ public class Scheduler implements Iterable<Task>{
 	 */
 	public boolean areTasksPartOf(Collection<Task> taskCollection) throws ModelException {
 		for (Task currentTask: taskCollection)
-			if (!this.tasks.contains(currentTask))
+			if (!this.isTaskPartOf(currentTask))
 				return false;
 		return true;
+	}
+	
+	/**
+	 * Returns whether the given tasks are all part of the given scheduler.
+	 * 
+	 * @param scheduler
+	 *            The scheduler on which to check
+	 * @param tasks
+	 *            The tasks to check
+	 * @return true if all given tasks are part of the scheduler; false
+	 *         otherwise.
+	 * 
+	 * @throws ModelException
+	 *             A precondition was violated or an exception was thrown.s
+	 */
+	public boolean areTasksPartOf2(Collection<Task> taskCollection) throws ModelException {
+		return taskCollection.stream().allMatch(task->this.isTaskPartOf(task));
+	}
+	
+	public boolean isTaskPartOf(Task task){
+		return this.tasks.contains(task);
 	}
 	
 	/**
@@ -98,12 +119,25 @@ public class Scheduler implements Iterable<Task>{
 	 */
 	private final Faction faction;
 	
-	public List<Task> getTasksSatisfying(Predicate<? super Task> condition){
+	public List<Task> getTasksSatisfying(Predicate<Task> condition){
 		return this.tasks.stream().filter(condition).collect(Collectors.toList());
 	}
 	
+	public TreeSet<Task> getTasksSatisfying2(Predicate<Task> condition){
+		return this.tasks.stream()
+				.filter(condition).
+				collect(Collectors.toCollection(TreeSet::new));
+	}
+	
+	public Task getHighestPriorityTask2(){
+		TreeSet<Task> notAssignedTasks = this.getTasksSatisfying2(task->!task.isBeingExecuted());
+		if (notAssignedTasks == null)
+			return null;
+		return notAssignedTasks.first();
+	}
+	
 	// TODO
-	public Set<Task> GetAllTasks(){
+	public TreeSet<Task> getAllTasks(){
 		return this.tasks;
 	}
 	

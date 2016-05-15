@@ -15,7 +15,7 @@ public class MoveToStatement extends ActionStatement{
 	private Expression<int[]> target;
 	
 	private int[] getTargetCube(){
-		return target.getResult(this.getExectutingUnit());
+		return target.getResult(this.getExecutingUnit());
 	}
 	
 	@Override
@@ -31,8 +31,8 @@ public class MoveToStatement extends ActionStatement{
 
 	@Override
 	public boolean isFinished() {
-		return !super.getExectutingUnit().isMoving() && 
-			super.getExectutingUnit().getPosition().equals
+		return !super.getExecutingUnit().isMoving() && 
+			super.getExecutingUnit().getPosition().equals
 				(Vector.getCubeCenter(this.getTargetCube()));
 	}
 

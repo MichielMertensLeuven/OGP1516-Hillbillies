@@ -10,12 +10,12 @@ public class IsAliveExpression extends UnaryExpression<Boolean, Unit>{
 	}
 	
 	@Override
-	public Boolean getResult(Unit unit) {
-		return ((Unit) super.getSubExpression().getResult(unit)).isAlive(); 
+	public Boolean evaluate(Unit unit, Unit executor) {
+		return unit.isAlive();
 	}
 
 	@Override
-	public String toString() {
-		return "isAlive( " + this.getSubExpression().toString() + " )";
+	public String toString(String unit) {
+		return "isAlive( " + unit + " )";
 	}
 }

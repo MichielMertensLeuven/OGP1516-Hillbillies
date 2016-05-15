@@ -31,7 +31,7 @@ public abstract class Expression<T>{
 	 */
 	private final SourceLocation loc;
 	
-	public abstract T getResult(Unit unit);
+	public abstract T getResult(Unit executor);
 	
 	@Override
 	public abstract String toString();

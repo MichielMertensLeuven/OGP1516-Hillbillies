@@ -10,13 +10,12 @@ public class IsPassableExpression extends UnaryExpression<Boolean, int[]>{
 	}
 	
 	@Override
-	public Boolean getResult(Unit unit) {
-		int[] cube = (int[]) super.getSubExpression().getResult(unit);
-		return unit.getWorld().isPassable(cube);
+	public Boolean evaluate(int[] cube, Unit executor) {
+		return executor.getWorld().isPassable(cube);
 	}
 
 	@Override
-	public String toString() {
-		return "isPassable( " + this.getSubExpression().toString() + " )";
+	public String toString(String cube)	{
+		return "isPassable( " + cube + " )";
 	}
 }
