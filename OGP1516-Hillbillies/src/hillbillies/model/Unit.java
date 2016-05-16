@@ -1,4 +1,3 @@
-//TODO double dispatchS
 package hillbillies.model;
 
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.*;
 import ogp.framework.util.*;
 
 /**
@@ -37,7 +35,10 @@ import ogp.framework.util.*;
  * @invar  	The orientation of each Unit must be a valid orientation for any
  *         	Unit.
  *       	| isValidOrientation(getOrientation())
- *
+ * @invar  	The experiencePoints of each Unit must be a valid experiencePoints for any
+ *         	Unit.
+ *       	| isValidExperiencePoints(getExperiencePoints())
+ *       
  * @version  1.0
  * @author Michiel Mertens
  */
@@ -233,7 +234,7 @@ public class Unit extends GameObject{
      */
     @Raw
     private void setState(State state) {
-    	if (this.isDefending() || this.isAttacking() || this.isFalling())
+    	if (this.isAttacking() || this.isFalling())
     		this.lastStateBeforeInterruption = State.IDLE;
     	else
     		this.lastStateBeforeInterruption = this.getState();
@@ -299,11 +300,10 @@ public class Unit extends GameObject{
 		boolean isStateTransitionRefused = false;
 		switch (targetState) {
 		case WORKING:
-			isStateTransitionRefused = this.isFalling() || this.isWorking() || this.isMoving() || this.isDefending() || this.isAttacking() || this.isRecovering();
+			isStateTransitionRefused = this.isFalling() || this.isWorking() || this.isMoving() || this.isAttacking() || this.isRecovering();
 			break;
 		case ATTACKING:
-		case DEFENDING:
-			isStateTransitionRefused = this.isFalling() || this.isAttacking() || this.isDefending();
+			isStateTransitionRefused = this.isFalling() || this.isAttacking();
 			break;
 		case RESTING:
 			isStateTransitionRefused = !this.isState(State.IDLE);
@@ -735,9 +735,6 @@ public class Unit extends GameObject{
 	 * @effect	If the Unit is attacking, the attacking status has been updated.
 	 *			| if this.isState(State.ATTACKING) 
 	 * 			| this.finishAttack(duration)
-	 * @effect	If the Unit is defending, the defending status has been updated.
-	 *			| if this.isState(State.DEFENDING) 
-	 * 			| this.finishDefend(duration)
 	 * @effect	If the Unit is resting, his stamina goes up.
 	 * 	 		| if this.isState(State.RESTING) 
 	 * 			| this.finishResting(duration)
@@ -779,9 +776,6 @@ public class Unit extends GameObject{
 		case ATTACKING:
 			this.finishAttack(duration);
 			break;
-		case DEFENDING:
-			this.finishDefend(duration);
-			break;
 		case RESTING:
 			this.timeToStartResting = restInterval;
 			this.finishResting(duration);
@@ -794,8 +788,7 @@ public class Unit extends GameObject{
 			break;
 		}
 		// Unit must rest once in a specified time period
-		if (this.timeToStartResting < 0 && !this.isFalling() && 
-				!this.isAttacking() && !this.isDefending()) {
+		if (this.timeToStartResting < 0 && !this.isFalling() && !this.isAttacking()) {
 			this.forceRest();
 		}
 	}
@@ -1391,9 +1384,9 @@ public class Unit extends GameObject{
 	 * 			| (new.timeToWork == (500.0/this.getStrength())
 	 * @throws 	IllegalStateException
 	 * 			The Unit can't be already working, moving,
-	 * 			defending, attacking or recovering in a rest.
+	 * 			attacking or recovering in a rest.
 	 * 			| (this.isWorking() || this.isMoving() ||
-	 *			|  	this.isDefending() || this.isAttacking() || this.isRecovering())
+	 *			|  this.isAttacking() || this.isRecovering())
 	 */
 	public void startWorking() throws IllegalStateException{
 		if (!this.isStateTransitionAllowed(State.WORKING))
@@ -1713,24 +1706,9 @@ public class Unit extends GameObject{
 	}
 	
 	/**
-	 * Returns whether this Unit is currently defending to another Unit.
-	 * 
-	 * @return	Whether this Unit in working State.
-	 * 			| (this.isState(State.DEFENDING))
-	 */
-	public boolean isDefending(){
-		return this.isState(State.DEFENDING);
-	}
-	
-	/**
 	 * Variable registering the time left to finish the fight.
 	 */
 	private double timeToFight;
-	
-	/**
-	 * Variable containing the Unit which is currently attacking this Unit.
-	 */
-	private Unit isDefendingTo;
 	
 	/**
 	 * Variable containing the time a fight takes for all Units.
@@ -1749,7 +1727,7 @@ public class Unit extends GameObject{
 	 * 			The Units can't already be fighting and a Unit can't
 	 * 			fight itself.
 	 * 			| (this.isAttacking() || this.isDefending() ||
-	 *			|  		defender.isAttacking() || defender.isDefending() ||
+	 *			|  		defender.isAttacking() || defender.isFalling() ||
 	 *			|		(defender == this))
 	 * @throws 	IllegalArgumentException
 	 * 			The Units fighting must be in neighboring cubes.
@@ -1758,7 +1736,7 @@ public class Unit extends GameObject{
 	public void fight(Unit defender) throws IllegalStateException,
 	IllegalArgumentException{
 		if (!this.canFightWith(defender)){
-			if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
+			if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (defender.isFalling()) ||
 					(defender == this))
 				throw new IllegalStateException("from " + this.getState().toString() + " to FIGHTING");
 			if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
@@ -1772,7 +1750,7 @@ public class Unit extends GameObject{
 	
 	public boolean canFightWith(Unit defender){
 		boolean result = true;
-		if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (!defender.isStateTransitionAllowed(State.DEFENDING)) ||
+		if ((!this.isStateTransitionAllowed(State.ATTACKING)) || (defender.isFalling()) ||
 				(defender == this))
 			result = false; // wrong state
 		if (!this.getPosition().isDirectNeighboringCubeOnZLevel(defender.getPosition()))
@@ -1844,50 +1822,12 @@ public class Unit extends GameObject{
 	}
 	
 	/**
-	 * Start a fight between this Unit and attacker.
+	 * Method for defend against an attacker.
 	 * 
 	 * @param 	attacker
 	 * 			The Unit this Unit must defend to.
-	 * @post	The State of this Unit is attacking
-	 * 			| (new.isState(DEFENDING)
-	 * @post	The timeToFight is set to fightDuration.
-	 * 			| (new.timeToFight == fightDuration)
-	 * @post	The orientation of this Unit is set so the attacker
-	 * 			and defender are facing each other.
-	 * 			| (new.getOrientation == 
-	 * 			|		this.getPosition().orientationTo(attacker.getPosition()))
-	 * @post	The Unit of the attacker is registered.
-	 * 			| (new.isDefendingTo == attacker)
-	 */
-	private void defend(Unit attacker){
-		this.setState(State.DEFENDING);
-		this.interrupt();
-		this.timeToFight = fightDuration;
-		this.isDefendingTo = attacker;
-		this.setOrientation(this.orientationTo(attacker.getPosition()));
-	}
-	
-	/**
-	 * Method for advancing a fight with duration seconds for a defender.
-	 * 
-	 * @param 	duration
-	 * 			Time to advance the fight with.
-	 * @post	timeToFight has been updated, if fight is over, it is set to 0.
-	 * 			| if (this.timeToFight > duration)
-	 * 			| 		(new.timeToFight == this.timeToFight - duration
-	 * 			| else
-	 * 			| 		(new.timeToFight == 0)
-	 * @post	If a fight is over, the attacker is forgotten.
-	 * 			| if (this.timeToFight < duration)
-	 * 			| 		(new.isDefendingTo == null)
-	 * @post	If a fight is over, the State of this Unit is set back
-	 * 			to the state it had before it began fighting.
-	 * 			| if (this.timeToFight < duration)
-	 * 			| 	(new.isState(this.lastStateBeforeInterruption))
-	 * @post	If a fight is over, The Orientation of this Unit is set back
-	 * 			to the orientation it had before it began fighting.
-	 * 			| if (this.timeToFight < duration)
-	 * 			| 	(new.getOrientiation == this.lastOrientationBeforeInterruption)
+	 * @effect 	If the unit was doing a task it is interrupted
+	 * 			| this.interrupt()
 	 * @effect	If the fight ends and the Unit succeeds in dodging.
 	 * 			| if (this.timeToFight > duration) && (this.dodge)
 	 * 			| 	(this.dodge() == true)
@@ -1901,26 +1841,22 @@ public class Unit extends GameObject{
 	 * 			| (new.getCurrentHitpoints == (int) (this.getCurrentHitPoints()-
 	 *			|		this.isDefendingTo.getStrength()/10.0+0.5)
 	 */
-	private void finishDefend(double duration){
-		if (this.timeToFight > duration)
-			this.timeToFight -= duration;
-		else{
-			if ((! this.tryToDodge()) && (! this.block())){
-				int newHitPoints = (int) (this.getCurrentHitPoints()-
-						this.isDefendingTo.getStrength()/10.0+0.5);
-				if (newHitPoints < 0)
-					newHitPoints = 0;
-				this.setHitPoints(newHitPoints);
-				this.isDefendingTo.addExperiencePoints(20);
-				}
-			else{
-				this.addExperiencePoints(20);
+	private void defend(Unit attacker){
+		double previousOrientation = this.getOrientation();
+		this.interrupt();
+		this.setOrientation(this.orientationTo(attacker.getPosition()));
+		if ((! this.tryToDodge(attacker)) && (! this.block(attacker))){
+			int newHitPoints = (int) (this.getCurrentHitPoints()-
+					attacker.getStrength()/10.0+0.5);
+			if (newHitPoints < 0)
+				newHitPoints = 0;
+			this.setHitPoints(newHitPoints);
+			attacker.addExperiencePoints(20);
 			}
-			this.setOrientation(this.lastOrientationBeforeInterruption);
-			this.setState(this.lastStateBeforeInterruption);
-			this.timeToFight = 0.0;
-			this.isDefendingTo = null;
+		else{
+			this.addExperiencePoints(20);
 		}
+		this.setOrientation(previousOrientation);
 	}
 	
 	/**
@@ -1937,8 +1873,8 @@ public class Unit extends GameObject{
 	 * 			| else
 	 * 			| 	(result == false)
 	 */
-	private boolean tryToDodge(){
-		double dodgeProbability = 0.2*this.getAgility()/this.isDefendingTo.getAgility();
+	private boolean tryToDodge(Unit attacker){
+		double dodgeProbability = 0.2*this.getAgility()/attacker.getAgility();
 		double result = Math.random();
 		if (Util.fuzzyGreaterThanOrEqualTo(result, dodgeProbability))
 			return false;
@@ -1980,9 +1916,9 @@ public class Unit extends GameObject{
 	 * 			| else
 	 * 			| 		(result == false)
 	 */
-	private boolean block(){
+	private boolean block(Unit attacker){
 		double blockProbability = 0.25*(this.getAgility() + this.getStrength())/
-				(1.0*this.isDefendingTo.getAgility()+this.isDefendingTo.getStrength());
+				(1.0*attacker.getAgility()+attacker.getStrength());
 		double result = Math.random();
 		if (Util.fuzzyGreaterThanOrEqualTo(result, blockProbability))
 			return false;
@@ -2058,7 +1994,7 @@ public class Unit extends GameObject{
 	 * 			| (new.getOrientation == Position.defaultOrientation)
 	 */
 	private void forceRest() throws IllegalStateException{
-		if (!this.isAttacking() || !this.isDefending() || !this.isFalling())
+		if (!this.isAttacking() || !this.isFalling())
 			this.interrupt();
 			this.setState(State.RESTING);
 			this.isRecovering = true;
@@ -2260,7 +2196,6 @@ public class Unit extends GameObject{
 	 *         Unit.
 	 *       | isValidTask(getTask())
 	 */
-	//TODO
 	public boolean executeTask(Task task){
 		this.clearVariableTable(); // clean up old variable types from earlier tasks
 		this.setTask(task);
@@ -2296,15 +2231,15 @@ public class Unit extends GameObject{
 	
 	/**
 	 * Check whether the given task is a valid task for
-	 * any Unit.
+	 * this Unit.
 	 *  
 	 * @param  task
 	 *         The task to check.
 	 * @return 
-	 *       | result == 
+	 *       | result == task.isValidExecutingUnit(this)
 	*/
-	public static boolean isValidTask(Task task) {
-		return true; //TODO checken
+	public boolean isValidTask(Task task) {
+		return task.isValidExecutingUnit(this);
 	}
 	
 	/**
@@ -2336,14 +2271,6 @@ public class Unit extends GameObject{
 	public boolean isExecutingTask(){
 		return (task != null);
 	}
-
-	
-	//TODO
-	/** TO BE ADDED TO CLASS HEADING
-	 * @invar  The experiencePoints of each Unit must be a valid experiencePoints for any
-	 *         Unit.
-	 *       | isValidExperiencePoints(getExperiencePoints())
-	 */
 	
 	// -------------------
 	// VARIABLE STATEMENTS
@@ -2414,7 +2341,7 @@ public class Unit extends GameObject{
 	 */
 	public void addExperiencePoints(int ExpPoints) 
 			throws IllegalArgumentException {
-		if (! isValidExtraExperiencePoints(ExpPoints))
+		if (! Unit.isValidExtraExperiencePoints(ExpPoints))
 			throw new IllegalArgumentException();
 		int ExpReward = (Math.floorMod(this.getExperiencePoints(),10) + ExpPoints)/
 								nbExpPointsForReward;

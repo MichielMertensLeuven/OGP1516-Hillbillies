@@ -1,10 +1,7 @@
 package hillbillies.model.expression;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import hillbillies.model.Helper;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;

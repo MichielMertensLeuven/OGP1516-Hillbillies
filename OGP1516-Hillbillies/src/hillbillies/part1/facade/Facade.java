@@ -483,8 +483,7 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public boolean isAttacking(Unit unit) throws ModelException{
-		return unit.isAttacking() || unit.isDefending();
-//		TODO nakijken of enkel attacking
+		return unit.isAttacking();
 	}
 
 	/* Resting */

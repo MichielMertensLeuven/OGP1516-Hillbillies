@@ -1,0 +1,6 @@
+name: "dig_free"
+priority : 8000
+activities:
+		x:= (0, 14, 4);
+		moveTo next_to x;
+		work x;

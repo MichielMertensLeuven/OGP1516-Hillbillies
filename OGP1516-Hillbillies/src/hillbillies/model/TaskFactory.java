@@ -1,14 +1,8 @@
 package hillbillies.model;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import be.kuleuven.cs.som.annotate.*;
 import hillbillies.model.Task;
 import hillbillies.model.expression.*;
 import hillbillies.model.statement.*;
@@ -49,10 +43,7 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
 			result.add(new Task(name, priority, activity));
 		}
 		else {
-			for (int[] cube: selectedCubes){
-//				result.add(new Task(name, priority, activity, cube));
-				//TODO vragen work Alone?
-			}
+			throw new IllegalArgumentException();
 		}
 		return result;
 	}

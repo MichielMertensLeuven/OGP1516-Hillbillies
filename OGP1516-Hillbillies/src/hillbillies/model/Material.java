@@ -1,8 +1,6 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
-import hillbillies.model.*;
-import ogp.framework.util.Util;
 
 /** TO BE ADDED TO CLASS HEADING
  * @invar  The position of each material must be a valid position for any

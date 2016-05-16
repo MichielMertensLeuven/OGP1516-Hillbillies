@@ -4,6 +4,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
+@SuppressWarnings("rawtypes")
 public class PrintStatement extends Statement {
 
 	public PrintStatement(Expression value, SourceLocation loc) {

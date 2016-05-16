@@ -12,7 +12,6 @@ public enum State {
 	MOVING,
 	WORKING,
 	ATTACKING,
-	DEFENDING,
 	RESTING,
 	FALLING
 }
