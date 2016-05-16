@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.ModelException;
 
-public class Scheduler implements Iterable<Task>{
+public class Scheduler{
 	
 	/**
 	 * Initialize this new scheduler with given faction.
@@ -44,7 +44,7 @@ public class Scheduler implements Iterable<Task>{
 	public Task getHighestPriorityTask(){
 		if (this.getAllTasks().size() == 0)
 			return null;
-		Iterator<Task> taskIterator = this.iterator();
+		Iterator<Task> taskIterator = this.iteratorAllTasks();
 		Task task = taskIterator.next();
 		while (task.isBeingExecuted()){
 			if (!taskIterator.hasNext())
@@ -55,14 +55,25 @@ public class Scheduler implements Iterable<Task>{
 		return task;
 	}
 	
+	public void interruptTask(Task task) {
+		task.interrupt();
+	}
+	
 	public void removeTask(Task task){
+		Iterator<Task> it = this.iteratorAllTasks();
+		while (it.hasNext()){
+			Task inspect = it.next();
+			if (inspect.equals(task)){
+				it.remove();
+				break;
+			}
+		}
 		this.tasks.remove(task);
 		task.removeScheduler(this);
 	}
-
-	@Override
-	public Iterator<Task> iterator() {
-		return this.getAllTasks().iterator();
+	
+	public Iterator<Task> iteratorAllTasks() {
+		return this.tasks.iterator();
 	}
 	
 	/**
@@ -130,15 +141,15 @@ public class Scheduler implements Iterable<Task>{
 	}
 	
 	public Task getHighestPriorityTask2(){
-		TreeSet<Task> notAssignedTasks = this.getTasksSatisfying2(task->!task.isBeingExecuted());
-		if (notAssignedTasks == null)
+//		TreeSet<Task> notAssignedTasks = this.getTasksSatisfying2(task->!task.isBeingExecuted());
+		List<Task> notAssignedTasks = this.getTasksSatisfying(task->!task.isBeingExecuted());
+		if (notAssignedTasks.size() == 0)
 			return null;
-		return notAssignedTasks.first();
+		return notAssignedTasks.get(0);
 	}
 	
 	// TODO
 	public TreeSet<Task> getAllTasks(){
 		return this.tasks;
 	}
-	
 }

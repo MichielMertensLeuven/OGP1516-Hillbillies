@@ -887,7 +887,7 @@ public class Unit extends GameObject{
 				|			this.getWorld().hasSolidNeighbour(cube))
 	 * @throws IllegalArgumentException
 	 */
-	private boolean isStandableCube(int[] cube) throws IllegalArgumentException{
+	public boolean isStandableCube(int[] cube) throws IllegalArgumentException{
 		int x = cube[0];
 		int y = cube[1];
 		int z = cube[2];
@@ -1092,7 +1092,6 @@ public class Unit extends GameObject{
 					this.moveTo(this.targetPosition.getCubeCoordinates());
 				} catch (IllegalArgumentException e){
 					if (e.getMessage().equals("Can not stand on selected cube")){
-						System.out.println("collapsed catch");
 						shouldContinue = false;
 					}
 					else if (e.getMessage().equals("Position not reachable"))
@@ -1272,6 +1271,8 @@ public class Unit extends GameObject{
 		if ((!Vector.isValidAdjoint(dx)) || (!Vector.isValidAdjoint(dy)) ||
 				(!Vector.isValidAdjoint(dz)))
 			throw new IllegalArgumentException();
+		if (this.isMoving())
+			throw new IllegalStateException("cannot move to adjacent when already moving");
 		Vector adjacentPosition = this.getPosition().shift(dx,dy,dz);
 		this.moveTo(adjacentPosition.getCubeCoordinates());
 	}
@@ -1360,9 +1361,9 @@ public class Unit extends GameObject{
 		if (this.timeToWork > duration)
 			this.timeToWork -= duration;
 		else{
-			this.finishWorkAt(this.workingSpace[0], this.workingSpace[1], this.workingSpace[2]);
 			this.timeToWork = 0;
 			this.setState(State.IDLE);
+			this.finishWorkAt(this.workingSpace[0], this.workingSpace[1], this.workingSpace[2]);
 		}
 	}
 	
@@ -1480,12 +1481,14 @@ public class Unit extends GameObject{
 	 * 			| new.getExperiencePoints() == this.getExperiencePoints() + 10
 	 * 
 	 * @throws	IllegalStateException
-	 * 			The unit should be currently working.
-	 * 			| !this.isWorking()
+	 * 			The unit should be able to do something on the selected cube,
+	 * 			unless when in default behavior and not executing tasks.
+	 * 			| !this.isDefaultBehaviorEnabled() || this.isExecutingTask() &&
+	 * 			| (! (this.canDropMaterial || this.getWorld().isValidWorkshop(x,y,z) ||
+	 * 			|	  this.getWorld().cubeHasLog(x,y,z) || this.getWorld().cubeHasBoulder(x,y,z) ||
+	 * 			|	  this.getWorld().isSolid(x,y,z)))
 	 */
 	private void finishWorkAt(int x, int y, int z) throws IllegalStateException{
-		if (!this.isWorking())
-			throw new IllegalStateException();
 		if (this.canDropMaterial(x, y, z))
 			this.dropMaterial(x,y,z);
 		else if (this.getWorld().isValidWorkshop(x, y, z))
@@ -1496,6 +1499,10 @@ public class Unit extends GameObject{
 			this.pickUpBoulder(x,y,z);
 		else if (this.getWorld().isSolid(x,y,z))
 			this.getWorld().collapseCube(x,y,z);
+		else if (!this.isDefaultBehaviorEnabled() || this.isExecutingTask())
+			// defaultbehavior can trigger working on non-workable cubes without warning
+			// only warnings should be generated if this was triggered from a task
+			throw new IllegalStateException("nothing to do on selected cube");
 		this.addExperiencePoints(10);
 	}
 	
@@ -1854,6 +1861,7 @@ public class Unit extends GameObject{
 	 */
 	private void defend(Unit attacker){
 		this.setState(State.DEFENDING);
+		this.interrupt();
 		this.timeToFight = fightDuration;
 		this.isDefendingTo = attacker;
 		this.setOrientation(this.orientationTo(attacker.getPosition()));
@@ -2051,6 +2059,7 @@ public class Unit extends GameObject{
 	 */
 	private void forceRest() throws IllegalStateException{
 		if (!this.isAttacking() || !this.isDefending() || !this.isFalling())
+			this.interrupt();
 			this.setState(State.RESTING);
 			this.isRecovering = true;
 			this.elapsedRestingTime = 0;
@@ -2184,6 +2193,7 @@ public class Unit extends GameObject{
 	private void stopDefaultBehavior() throws IllegalStateException{
 		if (!this.defaultBehaviorEnabled)
 			throw new IllegalStateException();
+		this.interrupt();
 		this.defaultBehaviorEnabled = false;
 	}
 	
@@ -2193,8 +2203,9 @@ public class Unit extends GameObject{
 	 */
 	private void defaultBehavior(){
 		if (this.isExecutingTask()){
-			this.getTask().advanceTime();
-			if (this.getTask().isFinished())
+			if (!this.getTask().advanceTime())
+				this.interrupt();
+			else if (this.getTask().isFinished())
 				this.finishTask();
 		} 
 		else {
@@ -2202,7 +2213,14 @@ public class Unit extends GameObject{
 			if (task != null){
 				this.executeTask(task);
 			}
-			else {
+//		else if (!this.isExecutingTask()){
+//			List<Task> possibleTasks = this.getFaction().getScheduler().getTasksSatisfying(t->!t.isBeingExecuted());
+//			int i = 0; 
+//			while (i < possibleTasks.size() && !this.executeTask(possibleTasks.get(i)))
+//				i++;
+//
+//			if (i >= possibleTasks.size())
+			else{
 				double rand = Math.random();
 				if (rand < 0.25 && this.getAttackableUnit() != null)
 					this.fight(this.getAttackableUnit());
@@ -2243,15 +2261,30 @@ public class Unit extends GameObject{
 	 *       | isValidTask(getTask())
 	 */
 	//TODO
-	public void executeTask(Task task){
+	public boolean executeTask(Task task){
+		this.clearVariableTable(); // clean up old variable types from earlier tasks
 		this.setTask(task);
-		task.execute(this);
+		if (!task.execute(this)){
+			this.interrupt();
+			return false;
+		}
+		return true;
+	}
+	
+	private void interrupt(){
+		this.isSprinting = false;
+		if (this.isExecutingTask()){
+			this.getFaction().getScheduler().interruptTask(this.task);
+			this.task = null;
+		}
 	}
 	
 	public void finishTask(){
-		this.getFaction().getScheduler().removeTask(this.task);
+		this.task.finish();
 		this.task = null;
 	}
+	
+	
 
 	/**
 	 * Return the task of this Unit.
@@ -2301,8 +2334,9 @@ public class Unit extends GameObject{
 	private Task task = null;
 	
 	public boolean isExecutingTask(){
-		return task != null;
+		return (task != null);
 	}
+
 	
 	//TODO
 	/** TO BE ADDED TO CLASS HEADING
@@ -2310,6 +2344,34 @@ public class Unit extends GameObject{
 	 *         Unit.
 	 *       | isValidExperiencePoints(getExperiencePoints())
 	 */
+	
+	// -------------------
+	// VARIABLE STATEMENTS
+	// -------------------
+	
+	// Handle this on unit level, such that there is no interference between variable declaration of other tasks on other units or even previous tasks on this unit
+	private Map<String, Object> variableTable = new HashMap<>();
+	
+	public void writeVariable(String name, Object value) throws IllegalArgumentException {
+		if (variableTable.containsKey(name)) {
+			if (variableTable.get(name).getClass() != value.getClass()) {
+				throw new IllegalArgumentException("assignment to " + name + " of type " + value.getClass() + ", while " + variableTable.get(name).getClass() + " expected");
+			}
+		}
+		variableTable.put(name, value);
+	}
+	
+	public Object readVariable(String name) throws IllegalArgumentException {
+		if (!variableTable.containsKey(name)) {
+			throw new IllegalArgumentException("reading " + name + " not possible, since variable was not assigned yet");
+		}
+		return variableTable.get(name);
+	}
+	
+	public void clearVariableTable() {
+		variableTable.clear();
+	}
+	
 	
 	// -----------------
 	// EXPERIENCE POINTS

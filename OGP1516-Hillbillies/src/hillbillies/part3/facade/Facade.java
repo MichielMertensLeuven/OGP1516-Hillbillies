@@ -161,7 +161,7 @@ public class Facade extends hillbillies.part2.facade.Facade implements IFacade{
 	 */
 	@Override
 	public Iterator<Task> getAllTasksIterator(Scheduler scheduler) throws ModelException {
-		return scheduler.iterator();
+		return scheduler.iteratorAllTasks();
 	}
 
 	/**

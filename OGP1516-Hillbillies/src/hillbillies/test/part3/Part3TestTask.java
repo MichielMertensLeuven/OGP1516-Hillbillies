@@ -102,19 +102,19 @@ public class Part3TestTask {
 		Scheduler scheduler = new Scheduler(new Faction());
 		
 		Task task1 = this.parser.parseString(
-				"name: \"work on position100\"\npriority: 100\nactivities: work here;",
+				"name: \"task1\"\npriority: -200\nactivities: work here;",
 				Collections.emptyList()).get().get(0);
 		
 		Task task2 = this.parser.parseString(
-				"name: \"work on positionn100\"\npriority: -100\nactivities: work (1, 1, 1);",
+				"name: \"task2\"\npriority: -100\nactivities: work (1, 1, 1);",
 				Collections.emptyList()).get().get(0);
 		
 		Task task3 = this.parser.parseString(
-				"name: \"work on position300\"\npriority: 300\nactivities: work (1, 1, 1);",
+				"name: \"task3\"\npriority: -300\nactivities: work (1, 1, 1);",
 				Collections.emptyList()).get().get(0);
 		
 		Task task4 = this.parser.parseString(
-				"name: \"work on positionn500\"\npriority: -500\nactivities: work (1, 1, 1);",
+				"name: \"task4\"\npriority: -500\nactivities: work (1, 1, 1);",
 				Collections.emptyList()).get().get(0);
 		
 		scheduler.addTask(task1);
@@ -132,24 +132,34 @@ public class Part3TestTask {
 		assertFalse(scheduler.areTasksPartOf(subset));
 		assertFalse(scheduler.areTasksPartOf2(subset));
 		
+		scheduler.replaceTask(task3, task1);
+		assertEquals(scheduler.getAllTasks().size(),3);
+		Set<Task> subset2 = new HashSet<>();
+		subset2.add(task3);
 		for(Task task: scheduler.getAllTasks()){System.out.println(task.getName());}
-		Iterator<Task> it = scheduler.iterator();
+		assertFalse(scheduler.areTasksPartOf(subset2));
+		assertTrue(scheduler.areTasksPartOf(subset));
+		
+		for(Task task: scheduler.getAllTasks()){System.out.println(task.getName());}
+		Iterator<Task> it = scheduler.iteratorAllTasks();
 		System.out.println("iterator");
 		while (it.hasNext()){System.out.println(it.next().getName());}
-		System.out.println("echt "+ task3.getName());
+		System.out.println("echt "+ task2.getName());
 		System.out.println("1 " + scheduler.getHighestPriorityTask().getName());
 		System.out.println("2 " + scheduler.getHighestPriorityTask2().getName());
-		assertEquals(scheduler.getHighestPriorityTask().getName(),task3.getName());
-		assertEquals(scheduler.getHighestPriorityTask2().getName(),task3.getName());
-		assertEquals(scheduler.getTasksSatisfying(task-> task.getPriority()>0).size(),2);
-		assertEquals(scheduler.getTasksSatisfying(task-> task.getName().equals("work task")).size(),1);
+		assertEquals(scheduler.getHighestPriorityTask().getName(),task2.getName());
+		assertEquals(scheduler.getHighestPriorityTask2().getName(),task2.getName());
+		assertEquals(scheduler.getTasksSatisfying(task-> task.getPriority()>0).size(),0);
+		assertEquals(scheduler.getTasksSatisfying(task-> task.getName().equals("task2")).size(),1);
 		scheduler.removeTask(task3);
-		assertEquals(scheduler.getAllTasks().size(),2);
+		assertEquals(scheduler.getAllTasks().size(),3);
 		assertTrue(task1.getSchedulers().contains(scheduler));
 		assertEquals(task1.getSchedulers().size(),1);
 		Scheduler scheduler2 = new Scheduler(new Faction());
 		scheduler2.addTask(task1);
 		assertEquals(task1.getSchedulers().size(),2);
+		
+		
 		
 		
 		

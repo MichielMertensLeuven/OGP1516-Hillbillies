@@ -28,6 +28,16 @@ public class Part2TestWorld {
 		int nb = world.getNbUnits();
 		System.out.println(nb);
 		assertEquals("The world contains one Unit",1, world.getNbUnits());
+		assertTrue("The world contains this Unit", world.getUnits().contains(unit));
+		Unit unit2 = new Unit("TestUnit", new int[] {1,2,3}, 50, 50, 50, 50, false);
+		world.addGameObjectToWorld(unit2);
+		assertEquals("The world contains two Units",2, world.getNbUnits());
+		assertTrue("The world contains this Unit", world.getUnits().contains(unit));
+		assertTrue("The world contains this Unit", world.getUnits().contains(unit2));
+		world.removeGameObjectFromWorld(unit2);
+		assertEquals("The world contains one Unit",1, world.getNbUnits());
+		assertTrue("The world contains this Unit", world.getUnits().contains(unit));
+		assertFalse("The world contains this Unit", world.getUnits().contains(unit2));
 	}
 	
 	

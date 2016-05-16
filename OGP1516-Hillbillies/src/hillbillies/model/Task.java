@@ -15,9 +15,10 @@ import hillbillies.model.statement.Statement;
 public class Task implements Comparable<Task>{
 
 	private final String name;
-	private final int priority;
+	private int priority;
 	private final Statement activity;
 	private Set<Scheduler> schedulers;
+	private boolean finished;
 
 	public Task(String name, int priority, Statement activity) {
 		if (activity == null) {
@@ -30,6 +31,7 @@ public class Task implements Comparable<Task>{
 		this.priority = priority;
 		this.activity = activity;
 		this.schedulers = new HashSet<>();
+		this.finished = false;
 	}
 
 	@Override
@@ -42,11 +44,16 @@ public class Task implements Comparable<Task>{
 		return this.name;
 	}
 	
-	public void execute(Unit unit) throws IllegalStateException, IllegalArgumentException{
+	public boolean execute(Unit unit) throws IllegalStateException, IllegalArgumentException{
 		if (unit.getTask() != this)
 			throw new IllegalStateException();
-		this.setExecutingUnit(unit);
-		this.activity.execute(unit); //TODO Double dispatch
+		try{
+			this.setExecutingUnit(unit);
+			this.activity.execute(unit); //TODO Double dispatch
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	/**
@@ -99,12 +106,17 @@ public class Task implements Comparable<Task>{
 	 */
 	private Unit executingUnit = null;
 	
-	public void advanceTime(){
-		this.activity.advanceTime();
+	public boolean advanceTime(){
+		try{
+			this.activity.advanceTime();
+			return true;
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 	
 	public boolean isFinished(){
-		return this.activity.isFinished();
+		return this.finished || this.activity.isFinished();
 	}
 	
 	public int getPriority(){
@@ -128,7 +140,8 @@ public class Task implements Comparable<Task>{
 	}
 	
 	public Set<Scheduler> getSchedulers(){
-		return this.schedulers;
+		Set<Scheduler> result = new HashSet<>(this.schedulers);
+		return result;
 	}
 	
 	public void addScheduler(Scheduler scheduler) throws IllegalStateException{
@@ -145,5 +158,25 @@ public class Task implements Comparable<Task>{
 	
 	public boolean equals(Task other){
 		return (this == other);
+	}
+
+	public void interrupt() {
+		Set<Scheduler> schedulers = this.getSchedulers();
+		for (Scheduler scheduler: schedulers){
+			scheduler.removeTask(this); //to keep the set sorted on priority
+		}
+		this.priority -= 20;
+		for (Scheduler scheduler: schedulers){
+			scheduler.addTask(this); //to keep the set sorted on priority
+		}
+		this.executingUnit = null;
+	}
+	
+	public void finish() throws IllegalStateException{
+		this.finished = true;
+		for (Scheduler scheduler: this.getSchedulers()){
+			scheduler.removeTask(this);
+		}
+		this.executingUnit = null;
 	}
 }

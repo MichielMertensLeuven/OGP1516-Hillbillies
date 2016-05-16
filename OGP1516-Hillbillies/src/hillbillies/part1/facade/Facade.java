@@ -124,7 +124,7 @@ public class Facade implements IFacade {
 	public void setWeight(Unit unit, int newValue) throws ModelException{
 		unit.setWeight(newValue);
 	}
-// hier moeten nog try and catch!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+//TODO hier moeten nog try and catch!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
 	/**
 	 * Return the strength attribute of the given unit.
 	 * 
@@ -302,8 +302,12 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException{
-		try{unit.moveToAdjacent(dx, dy, dz);}
-		catch (IllegalArgumentException e){throw new ModelException("Invalid position");}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.moveToAdjacent(dx, dy, dz);
+			}
+		catch (Exception e){throw new ModelException("not able move to adjacent");}
 	}
 
 	/**
@@ -341,8 +345,11 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void startSprinting(Unit unit) throws ModelException{
-		try{unit.startSprinting();}
-		catch (IllegalStateException e){throw new ModelException("Not possible to start sprinting");}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.startSprinting();}
+		catch (Exception e){throw new ModelException("Not possible to start sprinting");}
 	}
 
 	/**
@@ -354,8 +361,11 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void stopSprinting(Unit unit) throws ModelException{
-		try{unit.stopSprinting();}
-		catch (IllegalStateException e){throw new ModelException("Unit is not sprinting");}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.stopSprinting();}
+		catch (IllegalStateException e){throw new ModelException("Unit can not stop sprinting");}
 	}
 
 	/**
@@ -400,7 +410,10 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void moveTo(Unit unit, int[] cube) throws ModelException{
-		try{unit.moveTo(cube);}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.moveTo(cube);}
 		catch (IllegalArgumentException e){throw new ModelException(e.getMessage());}
 		catch (IllegalStateException e){throw new ModelException("Not able to move");}
 	}
@@ -416,7 +429,10 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void work(Unit unit) throws ModelException{
-		try{unit.work();}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.work();}
 		catch (IllegalStateException e){throw new ModelException("Not able to work");}
 	}
 
@@ -446,7 +462,10 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void fight(Unit attacker, Unit defender) throws ModelException{
-		try{attacker.fight(defender);
+		try{
+			if (attacker.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			attacker.fight(defender);
 		}
 		catch (IllegalStateException e){throw new ModelException(e.getMessage());}
 		catch (IllegalArgumentException e){
@@ -479,7 +498,10 @@ public class Facade implements IFacade {
 	 *             A precondition was violated or an exception was thrown.
 	 */
 	public void rest(Unit unit) throws ModelException{
-		try{unit.rest();}
+		try{
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.rest();}
 		catch (IllegalStateException e){throw new ModelException("Not able to rest");}
 	}
 

@@ -15,8 +15,10 @@ public class MoveToStatement extends ActionStatement{
 	private Expression<int[]> target;
 	
 	private int[] getTargetCube(){
-		return target.getResult(this.getExecutingUnit());
+		return this.targetCube;
 	}
+	
+	private int[] targetCube;
 	
 	@Override
 	public String toString(){
@@ -26,7 +28,9 @@ public class MoveToStatement extends ActionStatement{
 	@Override
 	public void execute(Unit unit) {
 		super.setExecutingUnit(unit);
-		unit.moveTo(this.getTargetCube());
+		this.targetCube = this.target.getResult(this.getExecutingUnit());
+		if (!this.isFinished())
+			unit.moveTo(this.getTargetCube());
 	}
 
 	@Override

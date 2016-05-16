@@ -18,7 +18,7 @@ public class AnyExpression extends NullaryExpression<Unit>{
 		Unit other = executor;
 		if (nbUnits > 1){
 			while (executor == other){
-				int rand = (int) Math.random()*nbUnits;
+				int rand = (int) (Math.random()*nbUnits);
 				Iterator<Unit> iter = executor.getWorld().getUnits().iterator();
 				for (int i=0; i<rand; i++)
 					iter.next();

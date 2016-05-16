@@ -17,7 +17,7 @@ public class PrintStatement extends Statement {
 	
 	@Override
 	public void execute(Unit unit) {
-		System.out.println(this.value);
+		System.out.println(this.value.getResult(unit));
 		this.isPrinted = true;
 	}
 

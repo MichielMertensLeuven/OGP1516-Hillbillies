@@ -1,16 +1,19 @@
 package hillbillies.model;
 
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import hillbillies.util.ConnectedToBorder;
-import hillbillies.model.*;
+import hillbillies.model.Unit;
 import hillbillies.part2.listener.TerrainChangeListener;
 import ogp.framework.util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,19 +25,28 @@ public class World {
 		this.listener = listener;
 		this.connectedToBorderHelper = 
 				new	ConnectedToBorder(this.getNbCubesX(),this.getNbCubesY(),this.getNbCubesZ());
+		List<int[]> cubesToCheck = new LinkedList<>();
 		for (int x=0; x<this.getNbCubesX(); x++){
 			for (int y=0; y<this.getNbCubesY(); y++){
 				for (int z=0; z<this.getNbCubesZ(); z++){
 					int terrain = terrainTypes[x][y][z];
-					if (!World.isValidTerrainType(terrain)){
+					if (!World.isValidTerrainType(terrain))
 						throw new IllegalArgumentException();
-					}
-					else if (World.isPassableTerrain(terrain)){
+					if (World.isPassableTerrain(terrain))
 						this.connectedToBorderHelper.changeSolidToPassable(x, y, z);
-					}
+					else
+						cubesToCheck.add(new int[]{x,y,z});
+						
 				}
 			}
 		}
+		List<int[]> cubesToCollapse = new LinkedList<>();
+		for (int[] cube: cubesToCheck){
+			if (!this.connectedToBorderHelper.isSolidConnectedToBorder(cube[0], cube[1], cube[2])){
+				cubesToCollapse.add(cube);
+			}
+		}
+		this.updateCubesToCollapse(cubesToCollapse);
 	}
 	
 	private final TerrainChangeListener listener;
@@ -102,11 +114,6 @@ public class World {
 	
 	private Map<int[], Double> cubesToCollapse = new HashMap<>();
 	
-	private void setCubeType(Vector cube, int newType) throws IllegalArgumentException{
-		setCubeType(cube.getCubeCoordinates()[0], cube.getCubeCoordinates()[1],
-				cube.getCubeCoordinates()[2], newType);
-	}
-
 	public boolean isValidCube(int x, int y, int z){
 		return (this.isValidCoordinateX(x) && this.isValidCoordinateY(y) &&
 				this.isValidCoordinateZ(z));
@@ -131,21 +138,21 @@ public class World {
 	
 	public Unit spawnUnit(boolean enableDefaultBehavior){
 		try{
-		Unit unit = new Unit(
-				"Unit",
-				this.getRandomCube(),
-				(int) (75*Math.random())+25,
-				(int) (75*Math.random())+25,
-				(int) (75*Math.random())+25,
-				(int) (75*Math.random())+25,
-				enableDefaultBehavior,
-				this.getSpawnFaction());
-		if (this.addGameObjectToWorld(unit))
-			return unit;
-		else
+			if (this.getNbUnits()<World.maxNbUnits){
+				Unit unit = new Unit(
+						"Unit",
+						this.getRandomCube(),
+						(int) (75*Math.random())+25,
+						(int) (75*Math.random())+25,
+						(int) (75*Math.random())+25,
+						(int) (75*Math.random())+25,
+						enableDefaultBehavior,
+						this.getSpawnFaction());
+				if (this.addGameObjectToWorld(unit))
+					return unit;
+			}
 			return null;
 		} catch (Throwable e){return null;} 
-		//TODO mag als unit niet meer bij world past, unit nog wel toegevoegd worden aan faction
 	}
 	
 	public int[] getRandomCube(){
@@ -171,13 +178,23 @@ public class World {
 		return new int[]{cube[0],cube[1],cube[2]-1};
 	}
 	
+	public Set<? extends GameObject> 
+		getGameObjectsSatisfying(Predicate<? super GameObject> condition){
+		return this.getGameObjects().stream().filter(condition).collect(Collectors.toSet());		
+	}
+//	
+//	public Set<Unit> getUnits(){
+//		Set<Unit> unitsInWorld = new HashSet<>();
+//		for (GameObject gameObject: this.getGameObjects()){
+//			if (gameObject instanceof Unit)
+//				unitsInWorld.add((Unit) gameObject);
+//		}
+//		return unitsInWorld;
+//	}
+		
+	@SuppressWarnings("unchecked")
 	public Set<Unit> getUnits(){
-		Set<Unit> unitsInWorld = new HashSet<>();
-		for (GameObject gameObject: this.getGameObjects()){
-			if (gameObject instanceof Unit)
-				unitsInWorld.add((Unit) gameObject);
-		}
-		return unitsInWorld;
+		return (Set<Unit>) this.getGameObjectsSatisfying(o->(o instanceof Unit));
 	}
 	
 	public int getNbUnits(){
@@ -252,10 +269,6 @@ public class World {
 				cubeIterator.remove();
 			}
 		}
-//		for (int[] cube: this.cubesToCollapse.keySet()){
-//			this.advanceCollapse(cube, duration); // TODO !! concurrent modification
-//		}
-		// advancing time for gameObjects
 		Set<GameObject> gameObjects = new HashSet<>();
 		gameObjects.addAll(this.getGameObjects());
 		for (GameObject object: gameObjects){ 

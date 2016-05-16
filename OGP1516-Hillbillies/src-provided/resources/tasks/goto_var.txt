@@ -3,3 +3,4 @@ priority : 5
 activities : x:= here;
 			moveTo (10,10,10);
 			moveTo x;
+			x:= true;

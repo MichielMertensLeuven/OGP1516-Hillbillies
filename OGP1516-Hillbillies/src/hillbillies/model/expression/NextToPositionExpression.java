@@ -1,6 +1,9 @@
 package hillbillies.model.expression;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import hillbillies.model.Helper;
 import hillbillies.model.Unit;
@@ -16,10 +19,13 @@ public class NextToPositionExpression extends UnaryExpression<int[], int[]>{
 	public int[] evaluate(int[] cube, Unit executor) {
 		List<Integer[]> neighbours =
 				executor.getWorld().getValidNeigbouringCubes(Helper.converter(cube));
-		int nbNeighbours = neighbours.size();
-		if (nbNeighbours != 0)
-			return Helper.converter(neighbours.get(0));
-		return null;
+		Optional<Integer[]> result = 
+				neighbours.stream().
+				filter(inspect->executor.isStandableCube(Helper.converter(inspect))).
+				findAny();
+		if (!result.isPresent())
+			return null;
+		return Helper.converter(result.get());
 		}
 
 	@Override

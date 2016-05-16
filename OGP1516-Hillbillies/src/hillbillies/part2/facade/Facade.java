@@ -103,12 +103,12 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade{
 	 *       from part 1.
 	 */
 	public void advanceTime(World world, double dt) throws ModelException{
-		try{
+//		try{
 			world.advanceTime(dt);
-		}
-		catch (IllegalArgumentException e){
-			throw new ModelException(e.getMessage());
-		}
+//		}
+//		catch (Throwable e){
+//			throw new ModelException(e.getMessage());
+//		}
 	}
 
 	/**
@@ -308,11 +308,14 @@ public class Facade extends hillbillies.part1.facade.Facade implements IFacade{
 	 */
 	public void workAt(Unit unit, int x, int y, int z) throws ModelException{
 		try{
-		unit.workAt(x,y,z);} catch (IllegalStateException e){
-			throw new ModelException("error occured when working");
-		} catch (IllegalArgumentException e){
-			throw new ModelException(e.getMessage());
-		}
+			if (unit.isDefaultBehaviorEnabled())
+				throw new IllegalStateException("Default behavior active");
+			unit.workAt(x,y,z);}
+		catch (IllegalStateException e){
+				throw new ModelException("error occured when working");
+			} catch (IllegalArgumentException e){
+				throw new ModelException(e.getMessage());
+			}
 	}
 
 	/* FACTIONS */
