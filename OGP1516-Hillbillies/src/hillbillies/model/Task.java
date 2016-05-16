@@ -116,7 +116,7 @@ public class Task implements Comparable<Task>{
 	}
 	
 	public boolean isFinished(){
-		return this.finished || this.activity.isFinished();
+		return this.finished || (this.isBeingExecuted() && this.activity.isFinished());
 	}
 	
 	public int getPriority(){

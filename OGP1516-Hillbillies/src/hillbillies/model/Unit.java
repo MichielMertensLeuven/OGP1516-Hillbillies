@@ -2209,7 +2209,7 @@ public class Unit extends GameObject{
 	private void interrupt(){
 		this.isSprinting = false;
 		if (this.isExecutingTask()){
-			this.getFaction().getScheduler().interruptTask(this.task);
+			this.task.interrupt();
 			this.task = null;
 		}
 	}

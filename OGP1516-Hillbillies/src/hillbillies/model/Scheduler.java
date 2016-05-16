@@ -55,10 +55,6 @@ public class Scheduler{
 		return task;
 	}
 	
-	public void interruptTask(Task task) {
-		task.interrupt();
-	}
-	
 	public void removeTask(Task task){
 		Iterator<Task> it = this.iteratorAllTasks();
 		while (it.hasNext()){

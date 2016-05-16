@@ -27,6 +27,7 @@ import hillbillies.model.expression.AndExpression;
 import hillbillies.model.expression.AnyExpression;
 import hillbillies.model.expression.Expression;
 import hillbillies.model.expression.FalseExpression;
+import hillbillies.model.expression.OrExpression;
 import hillbillies.model.expression.TrueExpression;
 import hillbillies.model.statement.Statement;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
@@ -98,86 +99,45 @@ public class Part3TestTask {
 	
 	@Test
 	public void testTaskCondition() throws ModelException {
-
-		Scheduler scheduler = new Scheduler(new Faction());
+		AndExpression andFF = new AndExpression(new FalseExpression(null), new FalseExpression(null), null);
+		assertFalse(andFF.getResult(null)); 	
+		AndExpression andTF = new AndExpression(new TrueExpression(null), new FalseExpression(null), null);
+		assertFalse(andTF.getResult(null)); 	
+		AndExpression andFT = new AndExpression(new FalseExpression(null), new TrueExpression(null), null);
+		assertFalse(andFT.getResult(null)); 	
+		AndExpression andTT = new AndExpression(new TrueExpression(null), new TrueExpression(null), null);
+		assertTrue(andTT.getResult(null)); 	
 		
+		OrExpression orFF = new OrExpression(new FalseExpression(null), new FalseExpression(null), null);
+		assertFalse(orFF.getResult(null)); 	
+		OrExpression orTF = new OrExpression(new TrueExpression(null), new FalseExpression(null), null);
+		assertTrue(orTF.getResult(null)); 	
+		OrExpression orFT = new OrExpression(new FalseExpression(null), new TrueExpression(null), null);
+		assertTrue(orFT.getResult(null)); 	
+		OrExpression orTT = new OrExpression(new TrueExpression(null), new TrueExpression(null), null);
+		assertTrue(orTT.getResult(null)); 	
+	}
+	@Test
+	public void testTaskParsing() {	
 		Task task1 = this.parser.parseString(
 				"name: \"task1\"\npriority: -200\nactivities: work here;",
 				Collections.emptyList()).get().get(0);
+		assertTrue(task1 != null);
+		assertEquals(task1.getName(),"task1");
+		assertTrue(task1.getPriority() == -200);
+		assertFalse(task1.isFinished());
 		
 		Task task2 = this.parser.parseString(
 				"name: \"task2\"\npriority: -100\nactivities: work (1, 1, 1);",
 				Collections.emptyList()).get().get(0);
-		
-		Task task3 = this.parser.parseString(
-				"name: \"task3\"\npriority: -300\nactivities: work (1, 1, 1);",
-				Collections.emptyList()).get().get(0);
-		
-		Task task4 = this.parser.parseString(
-				"name: \"task4\"\npriority: -500\nactivities: work (1, 1, 1);",
-				Collections.emptyList()).get().get(0);
-		
-		scheduler.addTask(task1);
-		scheduler.addTask(task2);
-		scheduler.addTask(task3);
-		scheduler.addTask(task4);
-		
-		assertEquals(scheduler.getAllTasks().size(),4);
-		Set<Task> subset = new HashSet<>();
-		subset.add(task1);
-		subset.add(task2);
-		assertTrue(scheduler.areTasksPartOf(subset));
-		assertTrue(scheduler.areTasksPartOf2(subset));
-		scheduler.removeTask(task1);
-		assertFalse(scheduler.areTasksPartOf(subset));
-		assertFalse(scheduler.areTasksPartOf2(subset));
-		
-		scheduler.replaceTask(task3, task1);
-		assertEquals(scheduler.getAllTasks().size(),3);
-		Set<Task> subset2 = new HashSet<>();
-		subset2.add(task3);
-		for(Task task: scheduler.getAllTasks()){System.out.println(task.getName());}
-		assertFalse(scheduler.areTasksPartOf(subset2));
-		assertTrue(scheduler.areTasksPartOf(subset));
-		
-		for(Task task: scheduler.getAllTasks()){System.out.println(task.getName());}
-		Iterator<Task> it = scheduler.iteratorAllTasks();
-		System.out.println("iterator");
-		while (it.hasNext()){System.out.println(it.next().getName());}
-		System.out.println("echt "+ task2.getName());
-		System.out.println("1 " + scheduler.getHighestPriorityTask().getName());
-		System.out.println("2 " + scheduler.getHighestPriorityTask2().getName());
-		assertEquals(scheduler.getHighestPriorityTask().getName(),task2.getName());
-		assertEquals(scheduler.getHighestPriorityTask2().getName(),task2.getName());
-		assertEquals(scheduler.getTasksSatisfying(task-> task.getPriority()>0).size(),0);
-		assertEquals(scheduler.getTasksSatisfying(task-> task.getName().equals("task2")).size(),1);
-		scheduler.removeTask(task3);
-		assertEquals(scheduler.getAllTasks().size(),3);
-		assertTrue(task1.getSchedulers().contains(scheduler));
-		assertEquals(task1.getSchedulers().size(),1);
-		Scheduler scheduler2 = new Scheduler(new Faction());
-		scheduler2.addTask(task1);
-		assertEquals(task1.getSchedulers().size(),2);
-		
-		
-		
-		
-		
-		AndExpression a = new AndExpression(new FalseExpression(null), new TrueExpression(null), null);
-//		AndExpression a = new AndExpression(new AnyExpression(null), new TrueExpression(null), null);
-		
+		assertTrue(task2 != null);
+		assertEquals(task2.getName(),"task2");
+		assertTrue(task2.getPriority() == -100);
+		assertFalse(task2.isFinished());		
 	}
 
 	private boolean parsingSuccesfull(String file){
 		Optional<List<Task>> task;
-//		try {
-//			task = this.parser.parseFile(file, Collections.emptyList());
-//			task.get();
-//			return true;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return false;
 		try{
 		task = this.parser.parseFile(file, Collections.emptyList());
 		if (task.isPresent()) {
