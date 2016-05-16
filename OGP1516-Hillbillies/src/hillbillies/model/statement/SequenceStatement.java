@@ -30,13 +30,18 @@ public class SequenceStatement extends Statement{
 	}
 	
 	@Override
-	public void advanceTime() {
+	public void advanceTime(double duration) {
 		if (this.getCurrentStatement() != null){
-			this.getCurrentStatement().advanceTime();
-			if (this.getCurrentStatement().isFinished()){
-				this.statementIndexToExecute += 1;
-				if (!this.isFinished())
-					this.getCurrentStatement().execute(this.getExecutingUnit());
+			while (duration > 0.0) {
+				this.getCurrentStatement().advanceTime(Statement.statementDuration());
+				if (this.getCurrentStatement().isFinished()){
+					this.statementIndexToExecute += 1;
+					if (!this.isFinished())
+						this.getCurrentStatement().execute(this.getExecutingUnit());
+					else
+						break;
+				}
+				duration -= Statement.statementDuration();
 			}
 		}
 	}

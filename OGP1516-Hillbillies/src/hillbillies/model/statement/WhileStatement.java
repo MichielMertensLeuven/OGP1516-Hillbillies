@@ -28,15 +28,21 @@ public class WhileStatement extends Statement {
 	}
 
 	@Override
-	public void advanceTime() {
-		if (!this.isFinished())
-			if (!this.body.isFinished())
-				this.body.advanceTime();
-			else
-				if (this.condition.getResult(super.getExecutingUnit()))
-					this.body.execute(super.getExecutingUnit());
+	public void advanceTime(double duration) {
+		if (!this.isFinished()){
+			while (duration > 0.0) {
+				if (!this.body.isFinished())
+					this.body.advanceTime(Statement.statementDuration());
 				else
-					this.isFinished = true;
+					if (this.condition.getResult(super.getExecutingUnit()))
+						this.body.execute(super.getExecutingUnit());
+					else {
+						this.isFinished = true;
+						break;
+					}
+				duration -= Statement.statementDuration();
+			}
+		}
 	}
 
 	private Expression<Boolean> condition;

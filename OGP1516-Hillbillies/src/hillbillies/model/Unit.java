@@ -782,7 +782,7 @@ public class Unit extends GameObject{
 			break;
 		case IDLE:
 			if (this.isDefaultBehaviorEnabled()) {
-				this.defaultBehavior();
+				this.defaultBehavior(duration);
 			}
 		default:
 			break;
@@ -2137,9 +2137,9 @@ public class Unit extends GameObject{
 	 * Method to choose randomly what to do for when in defaultBehavior.
 	 * It may choose to work, rest or move to a random location in the gameWorld.
 	 */
-	private void defaultBehavior(){
+	private void defaultBehavior(double duration){
 		if (this.isExecutingTask()){
-			if (!this.getTask().advanceTime())
+			if (!this.getTask().advanceTime(duration))
 				this.interrupt();
 			else if (this.getTask().isFinished())
 				this.finishTask();

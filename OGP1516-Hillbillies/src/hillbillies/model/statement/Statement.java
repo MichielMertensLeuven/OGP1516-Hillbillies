@@ -37,7 +37,7 @@ public abstract class Statement {
 	
 	public abstract boolean isFinished();
 	
-	public abstract void advanceTime();
+	public abstract void advanceTime(double duration);
 	
 	public Unit getExecutingUnit(){
 		return this.executingUnit;
@@ -51,5 +51,9 @@ public abstract class Statement {
 	
 	@Override
 	public abstract String toString();
+	
+	public static double statementDuration(){
+		return 0.001;
+	}
 
 }

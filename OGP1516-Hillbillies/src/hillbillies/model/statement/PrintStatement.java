@@ -28,7 +28,7 @@ public class PrintStatement extends Statement {
 	}
 
 	@Override
-	public void advanceTime() {
+	public void advanceTime(double duration) {
 		// do nothing
 	}
 

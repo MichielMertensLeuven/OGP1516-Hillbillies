@@ -106,9 +106,9 @@ public class Task implements Comparable<Task>{
 	 */
 	private Unit executingUnit = null;
 	
-	public boolean advanceTime(){
+	public boolean advanceTime(double duration){
 		try{
-			this.activity.advanceTime();
+			this.activity.advanceTime(duration);
 			return true;
 		} catch (Throwable e) {
 			return false;

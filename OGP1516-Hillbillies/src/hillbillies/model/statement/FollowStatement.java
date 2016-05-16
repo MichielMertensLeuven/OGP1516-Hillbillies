@@ -22,11 +22,11 @@ public class FollowStatement extends ActionStatement{
 	public void execute(Unit unit) {
 		super.setExecutingUnit(unit);
 		this.targetUnit = targetUnitExpression.getResult(this.getExecutingUnit());
-		this.advanceTime();
+		this.advanceTime(0.0);
 	}
 	
 	@Override
-	public void advanceTime() {
+	public void advanceTime(double duration) {
 		if (!this.isFinished()){
 			super.getExecutingUnit().moveTo(this.targetUnit.getPosition().getCubeCoordinates());
 		}

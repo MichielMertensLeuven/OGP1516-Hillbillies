@@ -27,7 +27,7 @@ public class AssignmentStatement extends Statement {
 	}
 
 	@Override
-	public void advanceTime() {
+	public void advanceTime(double duration) {
 		//do nothing
 	}
 

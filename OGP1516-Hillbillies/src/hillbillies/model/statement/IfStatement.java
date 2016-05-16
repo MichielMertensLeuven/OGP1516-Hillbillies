@@ -36,9 +36,9 @@ public class IfStatement extends Statement {
 	}
 
 	@Override
-	public void advanceTime() {
+	public void advanceTime(double duration) {
 		if (this.selectedBody != null)
-			this.selectedBody.advanceTime();
+			this.selectedBody.advanceTime(duration);
 	}
 
 	private Expression<Boolean> condition;
