@@ -63,7 +63,8 @@ public abstract class UnaryExpression<T,U> extends Expression<T> {
 		U result = getSubExpression().getResult(executor);
 		return evaluate(result, executor);
 	}
-
+	
+	@Override
 	public String toString() {
 		return toString(getSubExpression().toString());
 	}

@@ -4,7 +4,7 @@ import hillbillies.model.Boulder;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class BoulderPositionExpression extends NullaryExpression<int[]>{
+public class BoulderPositionExpression extends Expression<int[]>{
 
 	public BoulderPositionExpression(SourceLocation loc) {
 		super(loc);

@@ -77,7 +77,7 @@ public class Task implements Comparable<Task>{
 		for (Scheduler scheduler: this.getSchedulers())
 			if (scheduler.getFaction() == executingUnit.getFaction())
 				return true;
-		return false; //TODO
+		return false;
 	}
 	
 	/**
@@ -127,8 +127,9 @@ public class Task implements Comparable<Task>{
 		return (this.executingUnit != null);
 	}
 	
-	// never return 0, to avoid tasks being eliminated as duplicates
-	// while using TreeSet in scheduler. //TODO Commentaar
+	// Only returns 0 if it is actually the same task, 
+	// to avoid tasks being eliminated as duplicates
+	// while using TreeSet in scheduler.
 	@Override
 	public int compareTo(Task other) {
 		if (this.getPriority() > other.getPriority())

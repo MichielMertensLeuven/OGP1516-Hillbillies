@@ -3,7 +3,7 @@ package hillbillies.model.expression;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class HereExpression extends NullaryExpression<int[]>{
+public class HereExpression extends Expression<int[]>{
 
 	public HereExpression(SourceLocation loc) {
 		super(loc);

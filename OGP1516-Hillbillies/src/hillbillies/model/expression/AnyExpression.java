@@ -5,7 +5,7 @@ import java.util.Iterator;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class AnyExpression extends NullaryExpression<Unit>{
+public class AnyExpression extends Expression<Unit>{
 
 	public AnyExpression(SourceLocation loc) {
 		super(loc);

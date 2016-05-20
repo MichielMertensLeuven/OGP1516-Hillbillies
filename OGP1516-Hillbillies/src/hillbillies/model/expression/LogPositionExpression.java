@@ -4,7 +4,7 @@ import hillbillies.model.Log;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public class LogPositionExpression extends NullaryExpression<int[]>{
+public class LogPositionExpression extends Expression<int[]>{
 
 	public LogPositionExpression(SourceLocation loc) {
 		super(loc);

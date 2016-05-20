@@ -1,12 +1,10 @@
 package hillbillies.model.statement;
 
-import be.kuleuven.cs.som.annotate.Basic;
-import be.kuleuven.cs.som.annotate.Immutable;
-import be.kuleuven.cs.som.annotate.Raw;
+import hillbillies.model.SourceReference;
 import hillbillies.model.Unit;
 import hillbillies.part3.programs.SourceLocation;
 
-public abstract class Statement {
+public abstract class Statement extends SourceReference implements IStatement {
 	/**
 	 * Initialize this new Statement with given SourceLocation.
 	 * 
@@ -17,40 +15,18 @@ public abstract class Statement {
 	 *       | new.getSourceLocation() == loc
 	 */
 	public Statement(SourceLocation loc){
-		this.loc = loc;
+		super(loc);
 	}
-	
-	/**
-	 * Return the SourceLocation of this Statement.
-	 */
-	@Basic @Raw @Immutable
-	public SourceLocation getSourceLocation() {
-		return this.loc;
-	}
-	
-	/**
-	 * Variable registering the SourceLocation of this Statement.
-	 */
-	private final SourceLocation loc;
-	
-	public abstract void execute(Unit executor);
-	
-	public abstract boolean isFinished();
-	
-	public abstract void advanceTime(double duration);
 	
 	public Unit getExecutingUnit(){
 		return this.executingUnit;
 	}
 	
 	public void setExecutingUnit(Unit unit){
-		this.executingUnit = unit; //TODO checker
+		this.executingUnit = unit;
 	}
 	
 	private Unit executingUnit;
-	
-	@Override
-	public abstract String toString();
 	
 	public static double statementDuration(){
 		return 0.001;

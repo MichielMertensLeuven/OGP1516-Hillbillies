@@ -78,13 +78,17 @@ public abstract class BinaryExpression<T,U,V> extends Expression<T> {
 	 * Variable registering the expression of this UnaryExpression.
 	 */
 	private Expression<V> rightExpression;
+	
 	public abstract T evaluate(U left, V right, Unit executor);
+	
 	public abstract String toString(String left, String right);
+	
 	public T getResult(Unit executor) {
 		U leftResult  = getLeftExpression() .getResult(executor);
 		V rightResult = getRightExpression().getResult(executor);
 		return evaluate(leftResult, rightResult, executor);
 	}
+	
 	public String toString() {
 		return toString(getLeftExpression().toString(), getRightExpression().toString());
 	}
