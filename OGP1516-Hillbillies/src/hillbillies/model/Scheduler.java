@@ -3,15 +3,20 @@ package hillbillies.model;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import be.kuleuven.cs.som.annotate.*;
-import ogp.framework.util.ModelException;
 
+/**
+ * @invar	the faction of this scheduler has this scheduler as scheduler
+ * 			| this.getFaction().getScheduler() == this
+ * 
+ * @author Michiel
+ *
+ */
 public class Scheduler{
-	
 	/**
 	 * Initialize this new scheduler with given faction.
 	 * 
@@ -21,7 +26,7 @@ public class Scheduler{
 	 *         faction.
 	 *       | new.getFaction() == faction
 	 * @throws IllegalArgumentException
-	 *         This new scheduler cannot have the given faction as its faction.
+	 *         The faction doesn't have this as scheduler.
 	 *       | ! canHaveAsFaction(this.getFaction())
 	 */
 	public Scheduler(Faction faction){
@@ -71,17 +76,12 @@ public class Scheduler{
 	 * 			|  	result.getPriority() >= this.getAllTasks().pop().getPriority 
 	 */
 	public Task getHighestPriorityTask(){
-		if (this.getAllTasks().size() == 0)
+		Optional<Task> task = this.tasks.stream()
+				.filter(o->!o.isBeingExecuted()).
+				sorted().findFirst();
+		if (!task.isPresent())
 			return null;
-		Iterator<Task> taskIterator = this.iteratorAllTasks();
-		Task task = taskIterator.next();
-		while (task.isBeingExecuted()){
-			if (!taskIterator.hasNext())
-				return null;
-			else
-				task = taskIterator.next();
-		}
-		return task;
+		return task.get();
 	}
 	
 	/**
@@ -95,6 +95,8 @@ public class Scheduler{
 	 * 			| (new task).getSchedulers.contains(this) == false
 	 */
 	public void removeTask(Task task){
+		// explicitly remove the task from the iterator to avoid unspecified behavior
+		// while the original collection is modified.
 		Iterator<Task> it = this.iteratorAllTasks();
 		while (it.hasNext()){
 			Task inspect = it.next();
@@ -111,40 +113,25 @@ public class Scheduler{
 		return this.getAllTasks().iterator();
 	}
 	
-	/**
-	 * Returns whether the given tasks are all part of the given scheduler.
-	 * 
-	 * @param scheduler
-	 *            The scheduler on which to check
-	 * @param tasks
-	 *            The tasks to check
-	 * @return true if all given tasks are part of the scheduler; false
-	 *         otherwise.
-	 * 
-	 * @throws ModelException
-	 *             A precondition was violated or an exception was thrown.s
-	 */
-	public boolean areTasksPartOf(Collection<Task> taskCollection) throws ModelException {
-		for (Task currentTask: taskCollection)
-			if (!this.isTaskPartOf(currentTask))
-				return false;
-		return true;
-	}
+
+//	public boolean areTasksPartOf2(Collection<Task> taskCollection) throws ModelException {
+//		for (Task currentTask: taskCollection)
+//			if (!this.isTaskPartOf(currentTask))
+//				return false;
+//		return true;
+//	}
 	
 	/**
 	 * Returns whether the given tasks are all part of the given scheduler.
 	 * 
-	 * @param scheduler
-	 *            The scheduler on which to check
-	 * @param tasks
-	 *            The tasks to check
-	 * @return true if all given tasks are part of the scheduler; false
-	 *         otherwise.
-	 * 
-	 * @throws ModelException
-	 *             A precondition was violated or an exception was thrown.s
+	 * @param	scheduler
+	 *          The scheduler on which to check
+	 * @param 	tasks
+	 *          The tasks to check
+	 * @return 	true if all given tasks are part of the scheduler; false
+	 *         	otherwise.
 	 */
-	public boolean areTasksPartOf2(Collection<Task> taskCollection) throws ModelException {
+	public boolean areTasksPartOf(Collection<Task> taskCollection){
 		return taskCollection.stream().allMatch(task->this.isTaskPartOf(task));
 	}
 	
@@ -169,22 +156,7 @@ public class Scheduler{
 		return this.tasks.stream().filter(condition).collect(Collectors.toList());
 	}
 	
-	public TreeSet<Task> getTasksSatisfying2(Predicate<Task> condition){
-		return this.tasks.stream()
-				.filter(condition).
-				collect(Collectors.toCollection(TreeSet::new));
-	}
-	
-	public Task getHighestPriorityTask2(){
-//		TreeSet<Task> notAssignedTasks = this.getTasksSatisfying2(task->!task.isBeingExecuted());
-		List<Task> notAssignedTasks = this.getTasksSatisfying(task->!task.isBeingExecuted());
-		if (notAssignedTasks.size() == 0)
-			return null;
-		return notAssignedTasks.get(0);
-	}
-	
-	// TODO
 	public TreeSet<Task> getAllTasks(){
-		return (TreeSet<Task>) this.tasks.clone();
+		return this.tasks;
 	}
 }

@@ -5,7 +5,7 @@ import hillbillies.model.Vector;
 import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
-public class MoveToStatement extends ActionStatement{
+public class MoveToStatement extends Statement{
 	public MoveToStatement(Expression<int[]> target, SourceLocation loc){
 		// could check if expression returns position. But work alone.
 		super(loc);

@@ -26,11 +26,6 @@ public class AssignmentStatement extends Statement {
 		return this.isExecuted;
 	}
 
-	@Override
-	public void advanceTime(double duration) {
-		//do nothing
-	}
-
 	private String name;
 	private Expression value;
 	private boolean isExecuted;

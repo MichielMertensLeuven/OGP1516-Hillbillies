@@ -1,49 +1,32 @@
 package hillbillies.test.part3;
 
-import static hillbillies.tests.util.PositionAsserts.*;
-
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 
-//import org.junit.After;
-//import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
-//import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.model.*;
-import hillbillies.model.expression.AndExpression;
-import hillbillies.model.expression.AnyExpression;
-import hillbillies.model.expression.Expression;
-import hillbillies.model.expression.FalseExpression;
-import hillbillies.model.expression.OrExpression;
-import hillbillies.model.expression.TrueExpression;
-import hillbillies.model.statement.Statement;
-import hillbillies.part2.listener.DefaultTerrainChangeListener;
-import hillbillies.part3.facade.IFacade;
+import hillbillies.model.expression.*;
+import hillbillies.model.statement.*;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.TaskParser;
 import ogp.framework.util.ModelException;
-import ogp.framework.util.Util;
 
 public class Part3TestTask {
 	@Before
 	public void Initialize(){
-		ITaskFactory<Expression, Statement, Task> factory = new TaskFactory();
+		this.factory = new TaskFactory();
 		this.parser = TaskParser.create(factory);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	private ITaskFactory<Expression, Statement, Task> factory;
 	private TaskParser<?, ?, Task> parser;
 	
 	
@@ -117,6 +100,30 @@ public class Part3TestTask {
 		OrExpression orTT = new OrExpression(new TrueExpression(null), new TrueExpression(null), null);
 		assertTrue(orTT.getResult(null)); 	
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testTaskConditionAnonymous() throws ModelException {
+		
+		AndExpression andFF = new AndExpression(this.factory.createFalse(null), this.factory.createFalse(null), null);
+		assertFalse(andFF.getResult(null)); 	
+		AndExpression andTF = new AndExpression(this.factory.createTrue(null), this.factory.createFalse(null), null);
+		assertFalse(andTF.getResult(null)); 	
+		AndExpression andFT = new AndExpression(this.factory.createFalse(null), this.factory.createTrue(null), null);
+		assertFalse(andFT.getResult(null)); 	
+		AndExpression andTT = new AndExpression(this.factory.createTrue(null), this.factory.createTrue(null), null);
+		assertTrue(andTT.getResult(null)); 	
+		
+		OrExpression orFF = new OrExpression(this.factory.createFalse(null), this.factory.createFalse(null), null);
+		assertFalse(orFF.getResult(null)); 	
+		OrExpression orTF = new OrExpression(this.factory.createTrue(null), this.factory.createFalse(null), null);
+		assertTrue(orTF.getResult(null)); 	
+		OrExpression orFT = new OrExpression(this.factory.createFalse(null), this.factory.createTrue(null), null);
+		assertTrue(orFT.getResult(null)); 	
+		OrExpression orTT = new OrExpression(this.factory.createTrue(null), this.factory.createTrue(null), null);
+		assertTrue(orTT.getResult(null)); 	
+	}
+	
 	@Test
 	public void testTaskParsing() {	
 		Task task1 = this.parser.parseString(

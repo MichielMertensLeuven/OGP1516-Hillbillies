@@ -4,7 +4,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
-public class FollowStatement extends ActionStatement{
+public class FollowStatement extends Statement{
 	public FollowStatement(Expression<Unit> targetUnit, SourceLocation loc){
 		super(loc);
 		this.targetUnitExpression = targetUnit;

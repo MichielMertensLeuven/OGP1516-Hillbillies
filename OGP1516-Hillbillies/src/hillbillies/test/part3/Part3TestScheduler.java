@@ -6,31 +6,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.naming.ldap.InitialLdapContext;
-
-//import org.junit.After;
-//import org.junit.AfterClass;
 import org.junit.Before;
-//import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.model.*;
-import hillbillies.model.expression.AndExpression;
-import hillbillies.model.expression.AnyExpression;
-import hillbillies.model.expression.Expression;
-import hillbillies.model.expression.FalseExpression;
-import hillbillies.model.expression.HereExpression;
-import hillbillies.model.expression.LiteralPositionExpression;
-import hillbillies.model.expression.PositionOfExpression;
-import hillbillies.model.expression.ThisExpression;
-import hillbillies.model.expression.TrueExpression;
-import hillbillies.model.statement.MoveToStatement;
-import hillbillies.model.statement.PrintStatement;
-import hillbillies.model.statement.Statement;
-import hillbillies.model.statement.WorkStatement;
-import hillbillies.part3.programs.ITaskFactory;
+import hillbillies.model.statement.*;
+import hillbillies.model.expression.*;
 import hillbillies.part3.programs.SourceLocation;
-import hillbillies.part3.programs.TaskParser;
 import ogp.framework.util.ModelException;
 
 public class Part3TestScheduler {

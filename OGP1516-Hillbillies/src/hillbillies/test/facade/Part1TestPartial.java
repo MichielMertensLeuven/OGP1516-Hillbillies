@@ -6,25 +6,15 @@ import static hillbillies.tests.util.PositionAsserts.assertIntegerPositionEquals
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import hillbillies.model.Helper;
 import hillbillies.model.Unit;
 import hillbillies.model.World;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
 import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import ogp.framework.util.ModelException;
-import ogp.framework.util.Util;
 
 public class Part1TestPartial {
 

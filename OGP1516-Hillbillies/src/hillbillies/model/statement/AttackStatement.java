@@ -4,7 +4,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
-public class AttackStatement extends ActionStatement{
+public class AttackStatement extends Statement{
 	public AttackStatement(Expression<Unit> targetUnit, SourceLocation loc){
 		super(loc);
 		this.targetUnit = targetUnit;
@@ -14,7 +14,7 @@ public class AttackStatement extends ActionStatement{
 	
 	private Unit getTargetUnit(){
 		return targetUnit.getResult(this.getExecutingUnit());
-	} //TODO what if this.getExecutingUnit == null?
+	}
 	
 	@Override
 	public String toString(){
@@ -29,7 +29,7 @@ public class AttackStatement extends ActionStatement{
 
 	@Override
 	public boolean isFinished() {
-		return !super.getExecutingUnit().isAttacking(); //TODO klopt dit?
+		return !super.getExecutingUnit().isAttacking();
 	}
 
 	

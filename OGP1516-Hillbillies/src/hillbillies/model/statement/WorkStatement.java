@@ -4,7 +4,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.expression.Expression;
 import hillbillies.part3.programs.SourceLocation;
 
-public class WorkStatement extends ActionStatement{
+public class WorkStatement extends Statement{
 	public WorkStatement(Expression<int[]> target, SourceLocation loc){
 		// could check if expression returns position. But work alone.
 		super(loc);

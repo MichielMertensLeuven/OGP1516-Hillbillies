@@ -91,7 +91,8 @@ public class Unit extends GameObject{
 	 * 			| this.setDefaultBehaviorEnabled(enableDefaultBehavior)
 	 */
 	public Unit(String name, int[] initialPosition, int weight, int agility,
-			int strength, int toughness, boolean enableDefaultBehavior, Faction faction){
+			int strength, int toughness, boolean enableDefaultBehavior, Faction faction)
+				throws IllegalArgumentException, NullPointerException{
 		super(Vector.getCubeCenter(initialPosition));
 		this.setName(name);
 		this.setAgility(correctInitialAttribute(agility));
@@ -119,7 +120,8 @@ public class Unit extends GameObject{
 				|      enableDefaultBehavior, new Faction())
 	 */
 	public Unit(String name, int[] initialPosition, int weight, int agility,
-			int strength, int toughness, boolean enableDefaultBehavior){
+			int strength, int toughness, boolean enableDefaultBehavior) 
+			throws IllegalArgumentException, NullPointerException{
 		this(name, initialPosition, weight, agility, strength, toughness,
 				enableDefaultBehavior, new Faction());
 	}
@@ -757,7 +759,8 @@ public class Unit extends GameObject{
 	 * 			The duration is invalid.
 	 * 			| (!isValidDuration(duration))
 	 */
-	public void advanceTime(double duration) throws IllegalArgumentException{
+	public void advanceTime(double duration) throws
+			IllegalArgumentException, IllegalStateException{
 		if (!this.isAlive())
 			throw new IllegalStateException("Unit not alive");
 		if (!Unit.isValidDuration(duration))
@@ -1264,7 +1267,8 @@ public class Unit extends GameObject{
 	 * 			|((!Position.isValidAdjoint(dx)) || (!Position.isValidAdjoint(dy)) ||
 	 * 			|	 (!Position.isValidAdjoint(dz)))
 	 */
-	public void moveToAdjacent(int dx, int dy, int dz) throws IllegalArgumentException{
+	public void moveToAdjacent(int dx, int dy, int dz) throws 
+				IllegalArgumentException, IllegalStateException{
 		if ((!Vector.isValidAdjoint(dx)) || (!Vector.isValidAdjoint(dy)) ||
 				(!Vector.isValidAdjoint(dz)))
 			throw new IllegalArgumentException();
@@ -1329,7 +1333,7 @@ public class Unit extends GameObject{
 	 * 			The Unit must be already sprinting.
 	 * 			| (! this.isSprinting())
 	 */
-	public void stopSprinting(){
+	public void stopSprinting() throws IllegalStateException{
 		if (!this.isSprinting())
 			throw new IllegalStateException();
 		this.isSprinting = false;

@@ -31,5 +31,9 @@ public abstract class Statement extends SourceReference implements IStatement {
 	public static double statementDuration(){
 		return 0.001;
 	}
-
+	
+	@Override
+	public void advanceTime(double duration) {
+		//do nothing
+	}
 }

@@ -4,12 +4,7 @@ import static hillbillies.tests.util.PositionAsserts.*;
 
 import static org.junit.Assert.*;
 
-//import org.junit.After;
-//import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-//import org.junit.Before;
-//import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.model.*;
@@ -31,7 +26,7 @@ public class Part1TestUnit {
 		try{
 		new Unit("Jos", new int[] { 12, 11, 5 }, 50, 50, 50, 50, false);
 		} catch (NullPointerException e){
-			// OK //TODO
+			// OK //
 		}
 	}
 	

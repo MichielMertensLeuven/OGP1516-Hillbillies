@@ -426,7 +426,20 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
 	 */
 	@Override
 	public Expression createTrue(SourceLocation sourceLocation) {
-		return new TrueExpression(sourceLocation);
+//		return new TrueExpression(sourceLocation);
+//		alternative implementation using anonymous classes
+		return new Expression<Boolean>(sourceLocation){
+			
+			@Override
+			public Boolean getResult(Unit executor) {
+				return true;
+			}
+
+			@Override
+			public String toString() {
+				return "true";
+			}
+		};
 	}
 
 	/**
@@ -434,6 +447,19 @@ public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
 	 */
 	@Override
 	public Expression createFalse(SourceLocation sourceLocation) {
-		return new FalseExpression(sourceLocation);
+//		return new FalseExpression(sourceLocation);
+//		alternative implementation using anonymous classes
+		return new Expression<Boolean>(sourceLocation){
+			
+			@Override
+			public Boolean getResult(Unit executor) {
+				return false;
+			}
+
+			@Override
+			public String toString() {
+				return "false";
+			}
+		};
 	}
 }

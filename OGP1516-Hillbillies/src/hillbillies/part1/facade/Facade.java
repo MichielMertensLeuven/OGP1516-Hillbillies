@@ -124,7 +124,7 @@ public class Facade implements IFacade {
 	public void setWeight(Unit unit, int newValue) throws ModelException{
 		unit.setWeight(newValue);
 	}
-//TODO hier moeten nog try and catch!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+
 	/**
 	 * Return the strength attribute of the given unit.
 	 * 

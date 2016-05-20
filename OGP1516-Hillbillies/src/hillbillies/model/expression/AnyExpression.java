@@ -11,7 +11,6 @@ public class AnyExpression extends Expression<Unit>{
 		super(loc);
 	}
 	
-	//TODO echt random of niet nodig?
 	@Override
 	public Unit getResult(Unit executor) {
 		int nbUnits = executor.getWorld().getUnits().size();

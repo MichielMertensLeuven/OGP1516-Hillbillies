@@ -122,7 +122,11 @@ public abstract class GameObject {
 		return (!this.getWorld().hasSolidBeneath(position.getCubeCoordinates()));
 	}
 	
-	
+	/**
+	 * returns the distance this gameObject will fall.
+	 * 
+	 * @return	the distance this gameObject will fall.
+	 */
 	public double getDistanceToFall(){
 		int levels = 0;
 		while (this.isFallingPosition(this.getPosition().shift(0, 0, -levels)))
@@ -138,9 +142,10 @@ public abstract class GameObject {
 		if (!this.isFalling())
 			throw new IllegalStateException();
 		boolean stillFalling = true;
-		if (this.distanceToFall > duration*GameObject.getFallingVelocity()){
-			this.distanceToFall -= duration*GameObject.getFallingVelocity();
-			this.setPosition(this.getPosition().shift(0, 0, -duration*GameObject.getFallingVelocity()));
+		double fallenDistance = duration*GameObject.getFallingVelocity();
+		if (this.distanceToFall > fallenDistance){
+			this.distanceToFall -= fallenDistance;
+			this.setPosition(this.getPosition().shift(0, 0, -fallenDistance));
 		} else{
 			this.setPosition(this.getPosition().shift(0, 0, -this.distanceToFall));
 			this.distanceToFall = 0;
@@ -150,6 +155,8 @@ public abstract class GameObject {
 	}
 	
 	protected void startFalling() throws IllegalStateException{
+		if (!this.isFallingPosition(this.getPosition()))
+			throw new IllegalStateException();
 		this.isFalling = true;
 		this.distanceToFall = this.getDistanceToFall();
 	}

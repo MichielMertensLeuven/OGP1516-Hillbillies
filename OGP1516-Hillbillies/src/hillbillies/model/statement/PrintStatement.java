@@ -28,11 +28,6 @@ public class PrintStatement extends Statement {
 	}
 
 	@Override
-	public void advanceTime(double duration) {
-		// do nothing
-	}
-
-	@Override
 	public String toString() {
 		return "print( " + this.value.toString() + " )";
 	}
