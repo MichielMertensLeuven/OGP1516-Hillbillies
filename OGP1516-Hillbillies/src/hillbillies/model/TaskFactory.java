@@ -9,7 +9,7 @@ import hillbillies.model.statement.*;
 import hillbillies.part3.programs.ITaskFactory;
 import hillbillies.part3.programs.SourceLocation;
 
-//Expression without type in ITaskFactory, while Expression<T> used in implementation.
+//Expression used raw in ITaskFactory, while Expression<T> used in implementation.
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class TaskFactory implements ITaskFactory<Expression, Statement, Task>{
 	public TaskFactory(){

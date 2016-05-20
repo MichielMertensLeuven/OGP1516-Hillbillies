@@ -4,6 +4,8 @@ import static hillbillies.tests.util.PositionAsserts.*;
 
 import static org.junit.Assert.*;
 
+import javax.naming.ldap.UnsolicitedNotificationListener;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,20 +25,27 @@ public class Part1TestUnit {
 	
 	@Test
 	public void testIllegalUnitName(){
+		boolean result = false;
 		try{
-		new Unit("Jos", new int[] { 12, 11, 5 }, 50, 50, 50, 50, false);
-		} catch (NullPointerException e){
+		new Unit("jos", new int[] { 12, 11, 5 }, 50, 50, 50, 50, false);
+		} catch (Throwable e){
+			result = true;
 			// OK //
 		}
+		assertTrue(result);
 	}
 	
 	@Test
 	public void testIllegalUnitPosition(){
+		boolean result = false;
 		try{
-		new Unit("TestUnit", new int[] { 12, 11, 55 }, 50, 50, 50, 50, false);
-		} catch (IllegalArgumentException e){
+		Unit unit = new Unit("TestUnit", new int[] { 12, 11, 55 }, 50, 50, 50, 50, false);
+		unit.setWorld(world);
+		} catch (Throwable e){
 			// OK
+			result = true;
 		}
+		assertTrue(result);
 	}
 	
 	// ------------
@@ -109,7 +118,6 @@ public class Part1TestUnit {
 	// POSITION TESTING
 	// ----------------
 	
-// some tests must be added, first adapt Position class.
 	@Test
 	public void testCubeCoordinate(){
 		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
@@ -291,7 +299,7 @@ public class Part1TestUnit {
 		advanceTimeFor(attacker, 1, 0.05);
 		assertFalse("Fighting is over",attacker.isAttacking());
 		assertTrue("Walking should continue after fight",defender.isMoving());
-		advanceTimeFor(defender,5,0.05);
+		advanceTimeFor(defender,10,0.05);
 		assertDoublePositionEquals("Unit should have arrived",
 				1.5, 0.5, 3.5, defender.getPosition().getVector());
 	}

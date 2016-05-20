@@ -113,14 +113,6 @@ public class Scheduler{
 		return this.getAllTasks().iterator();
 	}
 	
-
-//	public boolean areTasksPartOf2(Collection<Task> taskCollection) throws ModelException {
-//		for (Task currentTask: taskCollection)
-//			if (!this.isTaskPartOf(currentTask))
-//				return false;
-//		return true;
-//	}
-	
 	/**
 	 * Returns whether the given tasks are all part of the given scheduler.
 	 * 

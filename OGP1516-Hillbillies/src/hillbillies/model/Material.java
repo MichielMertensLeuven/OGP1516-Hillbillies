@@ -44,10 +44,10 @@ public abstract class Material extends GameObject{
 	}
 	
 	public boolean isValidWeight(int weight){
-		return (Helper.inRange(weight, Material.minWeigtht, Material.maxWeight));
+		return (Helper.inRange(weight, Material.minWeight, Material.maxWeight));
 	}
 	
-	private static final int minWeigtht = 10;
+	private static final int minWeight = 10;
 	private static final int maxWeight = 50;
 
 	/**

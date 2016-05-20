@@ -2155,6 +2155,7 @@ public class Unit extends GameObject{
 			if (task != null){
 				this.executeTask(task);
 			}
+//	alternative: unit gets another task if he can't execute the highestPriorityTask		
 //		else if (!this.isExecutingTask()){
 //			List<Task> possibleTasks = this.getFaction().getScheduler().getTasksSatisfying(t->!t.isBeingExecuted());
 //			int i = 0; 
@@ -2436,4 +2437,3 @@ public class Unit extends GameObject{
 		this.setWorld(null);
 	}
 }
-	

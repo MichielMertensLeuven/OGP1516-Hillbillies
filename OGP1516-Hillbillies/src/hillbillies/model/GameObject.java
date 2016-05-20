@@ -24,8 +24,13 @@ public abstract class GameObject {
 	 * 			The world this GameObject will live in.
 	 * @post	The world of this GameObject is set to world.
 	 * 			| new.getWorld() == world
+	 * @throws  IllegalStateException
+	 * 			if the current position is not a valid position in the new world
+	 * 			| (!world.isValidPosition(this.getPosition()))
 	 */
-	public void setWorld(World world){
+	public void setWorld(World world) throws IllegalStateException{
+		if (!world.isValidPosition(this.getPosition()))
+			throw new IllegalStateException();
 		this.world = world;
 	}
 	

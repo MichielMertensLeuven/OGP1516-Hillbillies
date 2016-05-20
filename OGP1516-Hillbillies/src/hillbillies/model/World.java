@@ -184,17 +184,8 @@ public class World {
 	}
 	
 	public int getNbGameObjectsSatisfying(Predicate<? super GameObject> condition){
-	return (int) this.getGameObjects().stream().filter(condition).count();		
+		return (int) this.getGameObjects().stream().filter(condition).count();		
 	}
-//	
-//	public Set<Unit> getUnits(){
-//		Set<Unit> unitsInWorld = new HashSet<>();
-//		for (GameObject gameObject: this.getGameObjects()){
-//			if (gameObject instanceof Unit)
-//				unitsInWorld.add((Unit) gameObject);
-//		}
-//		return unitsInWorld;
-//	}
 		
 	@SuppressWarnings("unchecked")
 	public Set<Unit> getUnits(){

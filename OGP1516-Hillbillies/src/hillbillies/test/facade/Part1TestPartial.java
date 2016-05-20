@@ -1,6 +1,5 @@
 package hillbillies.test.facade;
 
-// @author Michiel Mertens
 import static hillbillies.tests.util.PositionAsserts.assertDoublePositionEquals;
 import static hillbillies.tests.util.PositionAsserts.assertIntegerPositionEquals;
 import static org.junit.Assert.assertEquals;
