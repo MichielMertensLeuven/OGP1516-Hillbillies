@@ -49,7 +49,7 @@ public class Task implements Comparable<Task>{
 			throw new IllegalStateException();
 		try{
 			this.setExecutingUnit(unit);
-			this.activity.execute(unit); //TODO Double dispatch
+			this.activity.execute(unit);
 			return true;
 		} catch (Throwable e) {
 			return false;
@@ -144,12 +144,36 @@ public class Task implements Comparable<Task>{
 		return result;
 	}
 	
+	/**
+	 * Method to add a scheduler to this task, should be called from Scheduler:
+	 * scheduler.addTask(this)
+	 * 
+	 * @param 	scheduler
+	 * 			the scheduler to add
+	 * @throws 	IllegalStateException
+	 * 			the scheduler should already contain this task
+	 * 			| !scheduler.isTaskPartOf(this)
+	 * @post	the scheduler is added
+	 * 			| this.getSchedulers().contains(scheduler)
+	 */
 	public void addScheduler(Scheduler scheduler) throws IllegalStateException{
 		if (!scheduler.isTaskPartOf(this))
 			throw new IllegalStateException();
 		this.schedulers.add(scheduler);
 	}
 	
+	/**
+	 * Method to remove a scheduler to this task, should be called from Scheduler:
+	 * scheduler.removeTask(this)
+	 * 
+	 * @param 	scheduler
+	 * 			the scheduler to remove
+	 * @throws 	IllegalStateException
+	 * 			the scheduler should already have removed this task
+	 * 			| scheduler.isTaskPartOf(this)
+	 * @post	the scheduler is removed
+	 * 			| !this.getSchedulers().contains(scheduler)
+	 */
 	public void removeScheduler(Scheduler scheduler) throws IllegalStateException{
 		if (scheduler.isTaskPartOf(this))
 			throw new IllegalStateException();

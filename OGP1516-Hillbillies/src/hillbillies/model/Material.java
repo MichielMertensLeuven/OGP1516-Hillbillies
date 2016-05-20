@@ -2,15 +2,12 @@ package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
 
-/** TO BE ADDED TO CLASS HEADING
+/** 
  * @invar  The position of each material must be a valid position for any
  *         material.
  *       | isValidPosition(getPosition())
- *       
- *
- * TO BE ADDED TO CLASS HEADING
  * @invar  Each material can have its weight as weight.
- *       | canHaveAsWeight(this.getWeight())
+ *       | isValidWeight(this.getWeight())
  */
  
 
@@ -67,18 +64,10 @@ public abstract class Material extends GameObject{
 	private final int weight;
 	
 	public void advanceTime(double dt){
-		if (this.isBeingCarried())
-			this.setPosition(this.isCarriedBy.getPosition());
-		else if (!this.isFalling() && this.isFallingPosition(this.getPosition()))
+		if (!this.isFalling() && this.isFallingPosition(this.getPosition()))
 			this.startFalling();
 		else if (this.isFalling()){
 			this.advanceFalling(dt);
 		}
 	}
-	
-	public boolean isBeingCarried(){
-		return (this.isCarriedBy != null);
-	}
-	
-	private Unit isCarriedBy = null;
 }

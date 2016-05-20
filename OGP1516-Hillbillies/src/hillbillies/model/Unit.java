@@ -38,8 +38,12 @@ import ogp.framework.util.*;
  * @invar  	The experiencePoints of each Unit must be a valid experiencePoints for any
  *         	Unit.
  *       	| isValidExperiencePoints(getExperiencePoints())
+ * @invar	The unit can only do validTasks and if he is busy doing a task, the 
+ * 			task has him as executing unit.
+ * 			| if (getTask() != null)
+ * 			| 	isValidTask(getTask()) && getTask().getExecutingUnit() == this
  *       
- * @version  1.0
+ * @version  3.0
  * @author Michiel Mertens
  */
 public class Unit extends GameObject{
@@ -1842,9 +1846,7 @@ public class Unit extends GameObject{
 	 *			|		this.isDefendingTo.getStrength()/10.0+0.5)
 	 */
 	private void defend(Unit attacker){
-		double previousOrientation = this.getOrientation();
 		this.interrupt();
-		this.setOrientation(this.orientationTo(attacker.getPosition()));
 		if ((! this.tryToDodge(attacker)) && (! this.block(attacker))){
 			int newHitPoints = (int) (this.getCurrentHitPoints()-
 					attacker.getStrength()/10.0+0.5);
@@ -1856,7 +1858,6 @@ public class Unit extends GameObject{
 		else{
 			this.addExperiencePoints(20);
 		}
-		this.setOrientation(previousOrientation);
 	}
 	
 	/**
@@ -1993,6 +1994,7 @@ public class Unit extends GameObject{
 	 * @post	The Unit rests in default orientation
 	 * 			| (new.getOrientation == Position.defaultOrientation)
 	 */
+	@Model
 	private void forceRest() throws IllegalStateException{
 		if (!this.isAttacking() || !this.isFalling())
 			this.interrupt();
@@ -2191,11 +2193,7 @@ public class Unit extends GameObject{
 		return null;
 	}
 	
-	/** TO BE ADDED TO CLASS HEADING
-	 * @invar  The task of each Unit must be a valid task for any
-	 *         Unit.
-	 *       | isValidTask(getTask())
-	 */
+	
 	public boolean executeTask(Task task){
 		this.clearVariableTable(); // clean up old variable types from earlier tasks
 		this.setTask(task);
@@ -2256,7 +2254,7 @@ public class Unit extends GameObject{
 	 *       | ! isValidTask(getTask())
 	 */
 	@Raw
-	public void setTask(Task task) 
+	private void setTask(Task task) 
 			throws IllegalArgumentException {
 		if (! isValidTask(task))
 			throw new IllegalArgumentException();
@@ -2407,10 +2405,12 @@ public class Unit extends GameObject{
 	private boolean isAlive = true;
 	
 	/**
-	 * Method to eliminate this Unit
+	 * Method to eliminate this Unit. All references are removed.
 	 * 
 	 * @post	The unit is dead.
 	 * 			| !this.isAlive()
+	 * @post	The unit's world is set to null.
+	 * 			| new.getWorld() == null;
 	 * @effect	If the unit was carrying some material,
 	 * 			it is dropped on the current position.
 	 * 			| this.dropMaterial((this.getPosition())
@@ -2419,7 +2419,9 @@ public class Unit extends GameObject{
 	 * @effect	The unit is removed form the faction.
 	 * 			| this.getFaction().removeUnit(this)
 	 */
-	private void kill(){
+	private void kill() throws IllegalStateException{
+		if (this.getCurrentHitPoints() != 0)
+			throw new IllegalStateException();
 		if (this.isCarryingMaterial())
 			this.dropMaterial(this.getPosition().getCubeCoordinates()[0],
 					this.getPosition().getCubeCoordinates()[1], this.getPosition().getCubeCoordinates()[2]);
@@ -2427,6 +2429,7 @@ public class Unit extends GameObject{
 		this.getFaction().removeUnit(this);
 		if (this.getWorld() != null)
 			this.getWorld().removeGameObjectFromWorld(this);
+		this.setWorld(null);
 	}
 }
 	

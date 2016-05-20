@@ -31,16 +31,45 @@ public class Scheduler{
 	
 	private TreeSet<Task> tasks;
 	
+	/**
+	 * Bidirectional method to add a task to this scheduler and 
+	 * add this scheduler to the task
+	 * 
+	 * @param 	task
+	 * 			task to add
+	 * @post	the task is added
+	 * 			| new.isTaskPartOf(task) == true
+	 * @post	the scheduler is added to the task
+	 * 			| (new task).getSchedulers().contains(this) == true;
+	 */
 	public void addTask(Task task) {
 		this.tasks.add(task);
 		task.addScheduler(this);
 	}
 	
+	/**
+	 * Replaces a task by another.
+	 * 
+	 * @param 	originalTask
+	 * 			the task to be replaced.
+	 * @param 	replacementTask
+	 * 			the task that will replace the other task.
+	 * @effect	the original task is removed and the replacement is added.
+	 * 			| this.removeTask(originalTask)
+	 * 			| this.addTask(replacementTask)
+	 */
 	public void replaceTask(Task originalTask, Task replacementTask){
 		this.removeTask(originalTask);
 		this.addTask(replacementTask);
 	}
 	
+	/**
+	 * Returns the task with the highest priority, which is not being executed.
+	 * 
+	 * @return 	task
+	 * 			| !result.isBeingExecuted && 
+	 * 			|  	result.getPriority() >= this.getAllTasks().pop().getPriority 
+	 */
 	public Task getHighestPriorityTask(){
 		if (this.getAllTasks().size() == 0)
 			return null;
@@ -55,6 +84,16 @@ public class Scheduler{
 		return task;
 	}
 	
+	/**
+	 * Remove a task from this scheduler
+	 * 
+	 * @param 	task
+	 * 			task to remove
+	 * @post	the task is removed
+	 * 			| new.isTaskPartOf(task) == false
+	 * @post	this scheduler is removed from the task
+	 * 			| (new task).getSchedulers.contains(this) == false
+	 */
 	public void removeTask(Task task){
 		Iterator<Task> it = this.iteratorAllTasks();
 		while (it.hasNext()){
@@ -69,7 +108,7 @@ public class Scheduler{
 	}
 	
 	public Iterator<Task> iteratorAllTasks() {
-		return this.tasks.iterator();
+		return this.getAllTasks().iterator();
 	}
 	
 	/**
@@ -146,6 +185,6 @@ public class Scheduler{
 	
 	// TODO
 	public TreeSet<Task> getAllTasks(){
-		return this.tasks;
+		return (TreeSet<Task>) this.tasks.clone();
 	}
 }

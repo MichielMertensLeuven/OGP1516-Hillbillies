@@ -1,0 +1,6 @@
+name: "while"
+priority : 500
+activities : while true
+			do 
+				print true;
+			done

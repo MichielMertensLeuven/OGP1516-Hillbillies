@@ -7,19 +7,25 @@ import static org.junit.Assert.*;
 //import org.junit.After;
 //import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 //import org.junit.Before;
 //import org.junit.BeforeClass;
 import org.junit.Test;
 
 import hillbillies.model.*;
+import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import ogp.framework.util.Util;
 
-public class Part1TestUnit {
 
+
+public class Part1TestUnit {
+	
 	// ----------------------
 	// INITIALIZATION TESTING
 	// ----------------------
-
+	
+	private static World world = new World(new int[5][5][5], new DefaultTerrainChangeListener());
+	
 	@Test
 	public void testIllegalUnitName(){
 		try{
@@ -112,6 +118,7 @@ public class Part1TestUnit {
 	@Test
 	public void testCubeCoordinate(){
 		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(new World(new int[5][5][5], new DefaultTerrainChangeListener()));
 		assertIntegerPositionEquals("A valid position should be accepted", 1, 2, 3, 
 				unit.getPosition().getCubeCoordinates());
 	}
@@ -164,30 +171,33 @@ public class Part1TestUnit {
 
 	@Test
 	public void testCorrectPositionAfterMoveToAdjacent(){
-		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+		Unit unit = new Unit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(world);
 		unit.moveToAdjacent(1, 0, -1);
 		double speed = unit.getCurrentSpeed();
 		double distance = Math.sqrt(2);
 		double time = distance / speed;
 		advanceTimeFor(unit, time, 0.05);
-		assertDoublePositionEquals(2.5, 2.5, 2.5, unit.getPosition().getVector());
+		assertDoublePositionEquals(2.5, 0.5, 2.5, unit.getPosition().getVector());
 	}
 	
 	@Test
 	public void testIllegalPositionMoveToAdjacent(){
-		Unit unit = new Unit("TestUnit", new int[] { 5, 0, 8 }, 50, 50, 50, 50, false);
+		Unit unit = new Unit("TestUnit", new int[] { 4, 0, 3}, 50, 50, 50, 50, false);
+		unit.setWorld(world);
 		try {unit.moveToAdjacent(0, -1, 1);}
 		catch (IllegalArgumentException e) {//OK
 		}
 		advanceTimeFor(unit, 100, 0.05);
-		assertDoublePositionEquals(5.5, 0.5, 8.5, unit.getPosition().getVector());
+		assertDoublePositionEquals(4.5, 0.5, 3.5, unit.getPosition().getVector());
 	}
 
 	
 	@Test
 	public void testCorrectStartSprinting(){
 		Unit unit = new Unit("TestUnit", new int[] { 0, 0, 0 }, 50, 50, 50, 50, false);
-		unit.moveTo(new int[] {25, 25, 25});
+		unit.setWorld(world);
+		unit.moveTo(new int[] {4, 4, 4});
 		unit.advanceTime(0.05);
 		double speedBefore = unit.getCurrentSpeed();
 		unit.startSprinting();
@@ -199,21 +209,23 @@ public class Part1TestUnit {
 
 	@Test
 	public void testCorrectPositionAfterMoveTo(){
-		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		unit.moveTo(new int[] {12, 24, 12});
+		Unit unit = new Unit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(world);
+		unit.moveTo(new int[] {3, 2, 4});
 		advanceTimeFor(unit, 100, 0.05);
-		assertDoublePositionEquals(12.5, 24.5, 12.5, unit.getPosition().getVector());
+		assertDoublePositionEquals(3.5, 2.5, 4.5, unit.getPosition().getVector());
 	}
 	
 	@Test
 	public void testIllegalPositionMoveTo(){
-		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		try{unit.moveTo(new int[] {12, 55, 12});}
+		Unit unit = new Unit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(world);
+		try{unit.moveTo(new int[] {4, 5, 1});}
 		catch (IllegalArgumentException e){// OK
 		}
 		advanceTimeFor(unit, 100, 0.05);
 		assertDoublePositionEquals("Unit shouldn't move to an illegal position",
-				1.5, 2.5, 3.5, unit.getPosition().getVector());
+				1.5, 0.5, 3.5, unit.getPosition().getVector());
 	}
 	
 	// ----------------
@@ -222,71 +234,71 @@ public class Part1TestUnit {
 	
 	@Test
 	public void testLegalFight(){
-		Unit attacker = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		Unit defender = new Unit("TestUnit", new int[] { 1, 3, 3 }, 50, 50, 50, 50, false);
+		Unit attacker = new Unit("TestUnit", new int[] { 0, 2, 3 }, 50, 50, 50, 50, false);
+		attacker.setWorld(world);
+		Unit defender = new Unit("TestUnit", new int[] { 0, 3, 3 }, 50, 50, 50, 50, false);
+		defender.setWorld(world);
 		attacker.fight(defender);
 		double step = 0.05; 
 		attacker.advanceTime(step);
 		defender.advanceTime(step);
 		Assert.assertEquals("The attacker should watch the defender", 
 				Math.PI/2.0, attacker.getOrientation(), Util.DEFAULT_EPSILON);
-		Assert.assertEquals("The defender should watch the attacker",
-				-Math.PI/2.0, defender.getOrientation(), Util.DEFAULT_EPSILON);
 		advanceTimeFor(attacker, 0.8, step);
 		advanceTimeFor(defender, 0.8, step);
 		assertTrue("Fight is not over yet",attacker.isAttacking());
-//		assertTrue("Fight is not over yet",defender.isDefending());
 		advanceTimeFor(attacker, 0.2, step);
 		advanceTimeFor(defender, 0.2, step);
 		assertFalse("Fight is over",attacker.isAttacking());
-//		assertFalse("Fight is over",defender.isDefending());
 	}
 	
 	@Test
 	public void testFightOtherZLevel(){
-		Unit attacker = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		Unit defender = new Unit("TestUnit", new int[] { 1, 2, 4 }, 50, 50, 50, 50, false);
+		Unit attacker = new Unit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		attacker.setWorld(world);
+		Unit defender = new Unit("TestUnit", new int[] { 1, 0, 4 }, 50, 50, 50, 50, false);
+		defender.setWorld(world);
 		try{attacker.fight(defender);}
 		catch (IllegalArgumentException e){//OK
 		}
 		attacker.advanceTime(0.05);
 		defender.advanceTime(0.05);
 		assertFalse("Units were too far away to fight",attacker.isAttacking());
-//		assertFalse("Units were too far away to fight",defender.isDefending());
 	}
 	
 	@Test
 	public void testFightTooFar(){
-		Unit attacker = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		Unit defender = new Unit("TestUnit", new int[] { 1, 4, 3 }, 50, 50, 50, 50, false);
+		Unit attacker = new Unit("TestUnit", new int[] { 0, 2, 3 }, 50, 50, 50, 50, false);
+		attacker.setWorld(world);
+		Unit defender = new Unit("TestUnit", new int[] { 0, 4, 3 }, 50, 50, 50, 50, false);
+		defender.setWorld(world);
 		try{attacker.fight(defender);}
 		catch (IllegalArgumentException e){//OK
 		}
 		attacker.advanceTime(0.05);
 		defender.advanceTime(0.05);
 		assertFalse("Units were too far away to fight",attacker.isAttacking());
-//		assertFalse("Units were too far away to fight",defender.isDefending());
 	}
 
 	
 	@Test
 	public void testFightWhileWalking(){
-		Unit attacker = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		Unit defender = new Unit("TestUnit", new int[] { 1, 3, 3 }, 50, 50, 50, 50, false);
+		Unit attacker = new Unit("TestUnit", new int[] { 0, 0, 3 }, 50, 50, 50, 50, false);
+		attacker.setWorld(world);
+		Unit defender = new Unit("TestUnit", new int[] { 0, 1, 3 }, 50, 50, 50, 50, false);
+		defender.setWorld(world);
 		defender.moveToAdjacent(1, -1, 0);
 		defender.advanceTime(0.05);
 		attacker.fight(defender);
 		attacker.advanceTime(0.05);
 		defender.advanceTime(0.05);
 		assertTrue("Fighting should interrupt walking",attacker.isAttacking());
-//		assertTrue("Fighting should interrupt walking",defender.isDefending());
-		advanceTimeFor(defender, 1, 0.05);
 		advanceTimeFor(attacker, 1, 0.05);
 		assertFalse("Fighting is over",attacker.isAttacking());
 		assertTrue("Walking should continue after fight",defender.isMoving());
 		advanceTimeFor(defender,5,0.05);
 		assertDoublePositionEquals("Unit should have arrived",
-				2.5, 2.5, 3.5, defender.getPosition().getVector());
+				1.5, 0.5, 3.5, defender.getPosition().getVector());
 	}
 	
 	// ---------------
@@ -295,7 +307,8 @@ public class Part1TestUnit {
 	
 	@Test
 	public void testRestingDuration(){
-		Unit unit = new Unit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+		Unit unit = new Unit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(world);
 		unit.rest();
 		unit.advanceTime(0.05);
 		assertTrue("Unit should be resting",unit.isResting());

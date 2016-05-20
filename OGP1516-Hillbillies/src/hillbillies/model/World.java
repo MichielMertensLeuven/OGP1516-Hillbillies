@@ -182,6 +182,10 @@ public class World {
 		getGameObjectsSatisfying(Predicate<? super GameObject> condition){
 		return this.getGameObjects().stream().filter(condition).collect(Collectors.toSet());		
 	}
+	
+	public int getNbGameObjectsSatisfying(Predicate<? super GameObject> condition){
+	return (int) this.getGameObjects().stream().filter(condition).count();		
+	}
 //	
 //	public Set<Unit> getUnits(){
 //		Set<Unit> unitsInWorld = new HashSet<>();
@@ -198,12 +202,7 @@ public class World {
 	}
 	
 	public int getNbUnits(){
-		int currentNbUnits = 0;
-		for (GameObject gameObject: this.getGameObjects()){
-			if (gameObject instanceof Unit)
-				currentNbUnits += 1;
-		}
-		return currentNbUnits;
+		return this.getNbGameObjectsSatisfying(o->(o instanceof Unit));
 	}
 	
 	private static final int maxNbUnits = 100;
@@ -318,10 +317,6 @@ public class World {
 			this.cubesToCollapse.put(cube, timeLeft-dt);
 		}
 		return collapse;
-//		} else{ //TODO
-//			this.cubesToCollapse.remove(cube);
-//			this.collapseCube(cube[0], cube[1], cube[2]);
-//		}
 	}
 	
 	public boolean isSolidConnectedToBorder(int x, int y, int z) throws IllegalArgumentException{

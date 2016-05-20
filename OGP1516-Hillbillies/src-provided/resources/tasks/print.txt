@@ -1,0 +1,35 @@
+name: "print" priority : 1000
+activities:
+	x:= true;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;
+	print x;

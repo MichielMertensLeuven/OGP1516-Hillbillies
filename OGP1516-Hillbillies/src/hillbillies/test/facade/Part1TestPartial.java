@@ -22,6 +22,7 @@ import hillbillies.model.Unit;
 import hillbillies.model.World;
 import hillbillies.part1.facade.Facade;
 import hillbillies.part1.facade.IFacade;
+import hillbillies.part2.listener.DefaultTerrainChangeListener;
 import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
@@ -119,13 +120,14 @@ public class Part1TestPartial {
 	@Test
 	public void testCorrectPosition() throws ModelException {
 		IFacade facade = new Facade();
-		Unit unit = facade.createUnit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
+		Unit unit = facade.createUnit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		unit.setWorld(new World(new int[5][5][5], new DefaultTerrainChangeListener()));
 		facade.moveToAdjacent(unit, 1, 0, -1);
 		double speed = facade.getCurrentSpeed(unit);
 		double distance = Math.sqrt(2);
 		double time = distance / speed;
 		advanceTimeFor(facade, unit, time, 0.05);
-		assertDoublePositionEquals(2.5, 2.5, 2.5, facade.getPosition(unit));
+		assertDoublePositionEquals(2.5, 0.5, 2.5, facade.getPosition(unit));
 	}
 	
 	/**
