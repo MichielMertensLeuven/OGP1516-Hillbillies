@@ -3,9 +3,6 @@ package hillbillies.test.unit;
 import static hillbillies.tests.util.PositionAsserts.*;
 
 import static org.junit.Assert.*;
-
-import javax.naming.ldap.UnsolicitedNotificationListener;
-
 import org.junit.Assert;
 import org.junit.Test;
 
