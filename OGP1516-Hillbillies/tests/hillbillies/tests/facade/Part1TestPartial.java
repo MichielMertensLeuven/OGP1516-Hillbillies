@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import hillbillies.model.Unit;
 import hillbillies.part1.facade.Facade;
-import hillbillies.part1.facade.IFacade;
 import ogp.framework.util.ModelException;
 
 public class Part1TestPartial {
@@ -108,32 +107,4 @@ public class Part1TestPartial {
 			assertEquals("This name is invalid because it contains invalid characters", "TestUnit", facade.getName(unit));
 		}
 	}
-	
-	@Test
-	public void testCorrectPosition() throws ModelException {
-		IFacade facade = new Facade();
-		Unit unit = facade.createUnit("TestUnit", new int[] { 1, 2, 3 }, 50, 50, 50, 50, false);
-		facade.moveToAdjacent(unit, 1, 0, -1);
-		double speed = facade.getCurrentSpeed(unit);
-		double distance = Math.sqrt(2);
-		double time = distance / speed;
-		advanceTimeFor(facade, unit, time, 0.05);
-		assertDoublePositionEquals(2.5, 2.5, 2.5, facade.getPosition(unit));
-	}
-
-	/**
-	 * Helper method to advance time for the given unit by some time.
-	 * 
-	 * @param time
-	 *            The time, in seconds, to advance.
-	 * @param step
-	 *            The step size, in seconds, by which to advance.
-	 */
-	private static void advanceTimeFor(IFacade facade, Unit unit, double time, double step) throws ModelException {
-		int n = (int) (time / step);
-		for (int i = 0; i < n; i++)
-			facade.advanceTime(unit, step);
-		facade.advanceTime(unit, time - n * step);
-	}
-
 }

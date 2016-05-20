@@ -1,5 +1,6 @@
 package hillbillies.tests.facade;
 
+import static hillbillies.tests.util.PositionAsserts.assertDoublePositionEquals;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
@@ -37,6 +38,22 @@ public class Part2TestPartial {
 		assertEquals(nbY, facade.getNbCubesY(world));
 		assertEquals(nbZ, facade.getNbCubesZ(world));
 	}
+	
+	@Test
+	public void testCorrectPosition() throws ModelException {
+		IFacade facade = new Facade();
+		Unit unit = facade.createUnit("TestUnit", new int[] { 1, 0, 3 }, 50, 50, 50, 50, false);
+		World world = new World(new int[5][5][5], new DefaultTerrainChangeListener());
+		facade.addUnit(unit, world);
+		facade.moveToAdjacent(unit, 1, 0, -1);
+		double speed = facade.getCurrentSpeed(unit);
+		double distance = Math.sqrt(2);
+		double time = distance / speed;
+		advanceTimeFor(facade, world, time, 0.05);
+		assertDoublePositionEquals(2.5, 0.5, 2.5, facade.getPosition(unit));
+	}
+
+
 
 	@Test
 	public void testCaveIn() throws ModelException {

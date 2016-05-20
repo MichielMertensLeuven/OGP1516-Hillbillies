@@ -26,10 +26,10 @@ public abstract class GameObject {
 	 * 			| new.getWorld() == world
 	 * @throws  IllegalStateException
 	 * 			if the current position is not a valid position in the new world
-	 * 			| (!world.isValidPosition(this.getPosition()))
+	 * 			| (world != null && !world.isValidPosition(this.getPosition()))
 	 */
 	public void setWorld(World world) throws IllegalStateException{
-		if (!world.isValidPosition(this.getPosition()))
+		if (world != null && !world.isValidPosition(this.getPosition()))
 			throw new IllegalStateException();
 		this.world = world;
 	}
